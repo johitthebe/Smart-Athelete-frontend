@@ -50,16 +50,23 @@ export default function Login() {
       }
 
       if (res.ok) {
+        console.log("LOGIN DATA:", data);
+        console.log("ROLE VALUE:", data?.user?.role);
+
         if (data.user) {
           localStorage.setItem("user", JSON.stringify(data.user));
         }
-        // Redirect after login; you can change based on role if you want
-        if (data.user?.role === "player") {
+
+        const role = data.user?.role;
+
+        // direct dashboards if role already set
+        if (role === "player" || role === "athlete") {
           router.push("/dashboard/player");
-        } else if (data.user?.role === "coach") {
+        } else if (role === "coach") {
           router.push("/dashboard/coach");
         } else {
-          router.push("/");
+          // no role yet → go to choose role page under auth
+          router.push("/auth/choose-role");
         }
       } else {
         setError(data?.error || "Invalid credentials");
@@ -71,9 +78,11 @@ export default function Login() {
   };
 
   const handleGoogleLogin = () => {
-    // Django allauth Google endpoint
-    window.location.href = "http://127.0.0.1:8000/accounts/google/login/";
+    // Start Google login; Django/allauth will redirect back to NEXT_URL
+    window.location.href =
+      "http://127.0.0.1:8000/accounts/google/login/?next=/post-login";
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-md px-6">
@@ -133,10 +142,7 @@ export default function Login() {
               className="w-full px-3 py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[#173B80]"
             />
             <div className="mt-2 text-right">
-              <a
-                href="#"
-                className="text-xs text-[#173B80] hover:underline"
-              >
+              <a href="#" className="text-xs text-[#173B80] hover:underline">
                 Forget Password
               </a>
             </div>
@@ -152,7 +158,7 @@ export default function Login() {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Don’t have an account?{" "}
-          <a href="/signup" className="text-[#173B80] hover:underline">
+          <a href="/auth/signup" className="text-[#173B80] hover:underline">
             Sign Up
           </a>
         </p>
@@ -160,6 +166,3 @@ export default function Login() {
     </div>
   );
 }
-
-
-    

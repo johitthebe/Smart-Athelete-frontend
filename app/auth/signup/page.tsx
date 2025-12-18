@@ -88,7 +88,7 @@ export default function Signup() {
       <div className="w-full max-w-xl px-6">
         {/* back button etc. – keep whatever UI you already have here */}
 
-        <h1 className="text-3xl md:text-4xl font-semibold text-center text-black mb-10">
+        <h1 className="text-3xl md:text-4xl font-semibold text-center text-blue-600 mb-10">
           Create your free account
         </h1>
 
