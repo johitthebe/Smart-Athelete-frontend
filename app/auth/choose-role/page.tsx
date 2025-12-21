@@ -53,13 +53,15 @@ export default function ChooseRole() {
         localStorage.setItem("user", JSON.stringify(updatedUser));
 
         // FIX 2: correct redirect for player vs coach
-        if (selectedRole === "athlete" || selectedRole === "coach") {
-          router.push("/dashboard/player");
-        } else if (selectedRole === "coach") {
-          router.push("/dashboard/coach");
-        } else {
-          router.push("/");
-        }
+        // correct redirect for athlete vs coach
+      if (selectedRole === "athlete") {
+        router.push("/dashboard/player");
+      } else if (selectedRole === "coach") {
+        router.push("/dashboard/coach");
+      } else {
+        router.push("/");
+      }
+
       } else {
         const data = await res.json();
         alert(data?.error || "Failed to set role");

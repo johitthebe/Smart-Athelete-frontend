@@ -65,7 +65,7 @@ export default function Signup() {
           localStorage.setItem("temp_user", JSON.stringify(data.user));
         }
         // 3) Redirect to choose role page
-        router.push("/choose-role");
+        router.push("/auth/choose-role");
       } else {
         console.log("REGISTER ERROR:", data);
         setError(
