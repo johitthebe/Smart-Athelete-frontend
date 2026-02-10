@@ -23,7 +23,7 @@ export default function Login() {
 
     try {
       // 1) Get CSRF cookie from Django
-      await fetch("http://127.0.0.1:8000/api/csrf/", {
+      await fetch("http://localhost:8000/api/csrf/", {
         method: "GET",
         credentials: "include",
       });
@@ -31,7 +31,7 @@ export default function Login() {
       const csrfToken = getCookie("csrftoken");
 
       // 2) Send login request (identifier = email or username)
-      const res = await fetch("http://127.0.0.1:8000/api/login/", {
+      const res = await fetch("http://localhost:8000/api/auth/login/", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -53,19 +53,17 @@ export default function Login() {
         console.log("LOGIN DATA:", data);
         console.log("ROLE VALUE:", data?.user?.role);
 
-        if (data.user) {
-          localStorage.setItem("user", JSON.stringify(data.user));
-        }
-
         const role = data.user?.role;
 
-        // direct dashboards if role already set
-        if (role === "player" || role === "athlete") {
-          router.push("/dashboard/player");
+        // Redirect based on role
+        if (role === "admin") {
+          router.push("/admin");
         } else if (role === "coach") {
           router.push("/dashboard/coach");
+        } else if (role === "athlete") {
+          router.push("/dashboard/player");
         } else {
-          // no role yet → go to choose role page under auth
+          // No role set yet → go to choose role page
           router.push("/auth/choose-role");
         }
       } else {

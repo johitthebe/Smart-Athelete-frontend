@@ -9,24 +9,53 @@ type Role = "coach" | "athlete";
 export default function ChooseRole() {
   const router = useRouter();
   const [user, setUser] = useState<any | null>(null);
-  const [selectedRole, setSelectedRole] = useState<Role>("coach");
+  const [selectedRole, setSelectedRole] = useState<Role>("athlete");
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // FIX 1: accept temp_user OR existing user from login
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    // Fetch current user from backend
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/auth/me/", {
+          method: "GET",
+          credentials: "include",
+        });
 
-    const tempUser = localStorage.getItem("temp_user");
-    const existingUser = localStorage.getItem("user");
+        if (res.ok) {
+          const userData = await res.json();
+          setUser(userData);
 
-    if (tempUser) {
-      setUser(JSON.parse(tempUser));
-    } else if (existingUser) {
-      setUser(JSON.parse(existingUser));
-    } else {
-      router.push("/signup");
-    }
+          // If user already has a role set (and it's not default athlete), redirect
+          if (userData.role && userData.role !== "athlete") {
+            if (userData.role === "admin") {
+              router.push("/admin");
+            } else if (userData.role === "coach") {
+              router.push("/dashboard/coach");
+            }
+          }
+        } else {
+          // Not authenticated, redirect to login
+          router.push("/auth/login");
+        }
+      } catch (err) {
+        console.error("Failed to fetch user:", err);
+        router.push("/auth/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
   }, [router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-gray-500">Loading...</div>
+      </div>
+    );
+  }
 
   if (!user) return null;
 
@@ -36,34 +65,44 @@ export default function ChooseRole() {
     try {
       setSubmitting(true);
 
-      const res = await fetch("http://127.0.0.1:8000/api/set-role/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user_id: (user as any).id, role: selectedRole }),
+      // Get CSRF token
+      const getCookie = (name: string) => {
+        if (typeof document === "undefined") return null;
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()!.split(";").shift() || null;
+        return null;
+      };
+
+      // Fetch CSRF cookie first
+      await fetch("http://localhost:8000/api/csrf/", {
+        method: "GET",
+        credentials: "include",
       });
 
+      const csrfToken = getCookie("csrftoken");
+
+      // Call set-my-role endpoint
+      const res = await fetch("http://localhost:8000/api/auth/set-my-role/", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+        },
+        body: JSON.stringify({ role: selectedRole }),
+      });
+
+      const data = await res.json();
+
       if (res.ok) {
-        // remove temp user
-        localStorage.removeItem("temp_user");
-
-        // build a full user object with role and store as "user"
-        const updatedUser = { ...(user as any), role: selectedRole };
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-
-        // FIX 2: correct redirect for player vs coach
-        // correct redirect for athlete vs coach
-      if (selectedRole === "athlete") {
-        router.push("/dashboard/player");
-      } else if (selectedRole === "coach") {
-        router.push("/dashboard/coach");
+        // Redirect based on role
+        if (selectedRole === "athlete") {
+          router.push("/dashboard/player");
+        } else if (selectedRole === "coach") {
+          router.push("/dashboard/coach");
+        }
       } else {
-        router.push("/");
-      }
-
-      } else {
-        const data = await res.json();
         alert(data?.error || "Failed to set role");
       }
     } catch (err) {
@@ -97,14 +136,14 @@ export default function ChooseRole() {
             : "border-gray-200 bg-white hover:border-[#173B80]/60"
         }`}
       >
-        {/* your image here */}
-        <Image
-          src={imageSrc}
-          alt={title}
-          width={120}
-          height={120}
-          className="mb-4"
-        />
+        <div className="relative w-[120px] h-[120px] mb-4">
+          <Image
+            src={imageSrc}
+            alt={title}
+            fill
+            className="object-contain"
+          />
+        </div>
         <h2 className="text-lg font-semibold mb-2">{title}</h2>
         <p className="text-sm text-gray-500 mb-2">{description}</p>
         {active && (
@@ -131,7 +170,7 @@ export default function ChooseRole() {
           Select your account type
         </h1>
         <p className="text-sm text-gray-500 mb-8">
-          We’ll streamline your setup experience accordingly.
+          We'll streamline your setup experience accordingly.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Navbar from "@/app/component/Navbar";
 import Footer from "@/app/component/Footer";
+import { performanceLogAPI } from "@/lib/api";
 
 const PERFORMANCE_CATEGORIES = ["Speed", "Endurance", "Strength", "Agility"];
 const UNITS = ["seconds", "meters", "reps", "kg"];
@@ -14,11 +15,40 @@ export default function PerformanceLogPage() {
   const [unit, setUnit] = useState("");
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: POST to /api/performance/
-    console.log({ category, testName, value, unit, date, notes });
+    setIsSubmitting(true);
+    setSubmitMessage("");
+
+    try {
+      const performanceData = {
+        event: `${category} - ${testName}`,
+        value: parseFloat(value),
+        intensity: 5, // Default intensity
+        notes: notes || "",
+        date_logged: date ? new Date(date).toISOString() : new Date().toISOString(),
+      };
+
+      await performanceLogAPI.create(performanceData);
+      
+      setSubmitMessage("Performance data saved successfully!");
+      
+      // Reset form
+      setTestName("");
+      setValue("");
+      setUnit("");
+      setDate("");
+      setNotes("");
+      
+    } catch (error) {
+      console.error("Error saving performance data:", error);
+      setSubmitMessage("Error saving performance data. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -142,13 +172,25 @@ export default function PerformanceLogPage() {
               />
             </div>
 
+            {/* Submit message */}
+            {submitMessage && (
+              <div className={`p-3 rounded-lg text-sm ${
+                submitMessage.includes("Error") 
+                  ? "bg-red-50 text-red-700 border border-red-200" 
+                  : "bg-green-50 text-green-700 border border-green-200"
+              }`}>
+                {submitMessage}
+              </div>
+            )}
+
             {/* Buttons */}
             <div className="flex items-center justify-between gap-3 pt-2">
               <button
                 type="submit"
-                className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-900"
+                disabled={isSubmitting}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                + Save Performance
+                {isSubmitting ? "Saving..." : "+ Save Performance"}
               </button>
               <button
                 type="button"

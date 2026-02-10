@@ -27,7 +27,7 @@ export default function Signup() {
 
     try {
       // 1) Get CSRF cookie from Django
-      await fetch("http://127.0.0.1:8000/api/csrf/", {
+      await fetch("http://localhost:8000/api/csrf/", {
         method: "GET",
         credentials: "include",
       });
@@ -35,7 +35,7 @@ export default function Signup() {
       const csrfToken = getCookie("csrftoken");
 
       // 2) Send register request with CSRF + cookies
-      const res = await fetch("http://127.0.0.1:8000/api/register/", {
+      const res = await fetch("http://localhost:8000/api/auth/register/", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -60,22 +60,30 @@ export default function Signup() {
       }
 
       if (res.ok) {
-        // Save temp user to localStorage
-        if (data.user) {
-          localStorage.setItem("temp_user", JSON.stringify(data.user));
-        }
-        // 3) Redirect to choose role page
+        // User is now logged in automatically
+        // Redirect to choose role page
         router.push("/auth/choose-role");
       } else {
         console.log("REGISTER ERROR:", data);
-        setError(
-          data?.username?.[0] ||
-            data?.email?.[0] ||
-            data?.first_name?.[0] ||
-            data?.last_name?.[0] ||
-            data?.error ||
-            "Registration failed."
-        );
+        
+        // Handle specific error messages
+        let errorMessage = "Registration failed.";
+        
+        if (data?.username) {
+          errorMessage = Array.isArray(data.username) 
+            ? data.username[0] 
+            : "Username already exists or is invalid.";
+        } else if (data?.email) {
+          errorMessage = Array.isArray(data.email)
+            ? data.email[0]
+            : "Email already exists or is invalid.";
+        } else if (data?.error) {
+          errorMessage = data.error;
+        } else if (data?.detail) {
+          errorMessage = data.detail;
+        }
+        
+        setError(errorMessage);
       }
     } catch (err) {
       console.error(err);
