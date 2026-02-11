@@ -1,366 +1,244 @@
 "use client";
 
-import { useState } from "react";
-import Navbar from "@/app/component/Navbar";
-import Sidebar from "@/app/component/coachsidebar";
-
-type ProgressStatus = "improving" | "stable" | "declining";
-
-type Athlete = {
-  id: number;
-  name: string;
-  lastUpdate: string;
-  progress: ProgressStatus;
-  score: number;
-};
-
-const ATHLETES: Athlete[] = [
-  { id: 1, name: "Alex Johnson", lastUpdate: "2 hours ago", progress: "improving", score: 85 },
-  { id: 2, name: "Emma Davis", lastUpdate: "1 day ago", progress: "stable", score: 78 },
-  { id: 3, name: "Michael Chen", lastUpdate: "3 days ago", progress: "improving", score: 82 },
-  { id: 4, name: "Sarah Martinez", lastUpdate: "1 week ago", progress: "declining", score: 68 },
-  { id: 5, name: "James Wilson", lastUpdate: "2 days ago", progress: "improving", score: 90 },
-];
-
-function ProgressPill({ status }: { status: ProgressStatus }) {
-  const base =
-    "inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium";
-
-  if (status === "improving") {
-    return (
-      <span className={`${base} bg-black text-white`}>
-        <span>↗</span>
-        improving
-      </span>
-    );
-  }
-  if (status === "declining") {
-    return (
-      <span className={`${base} bg-rose-500 text-white`}>
-        <span>↘</span>
-        declining
-      </span>
-    );
-  }
-  return (
-    <span className={`${base} bg-gray-100 text-gray-700`}>
-      stable
-    </span>
-  );
-}
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/config";
 
 export default function CoachDashboardPage() {
-  const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
-  const improving = ATHLETES.filter((a) => a.progress === "improving");
-  const needsAttention = ATHLETES.filter((a) => a.progress === "declining");
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [status, setStatus] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const avgScore =
-    Math.round(
-      (ATHLETES.reduce((sum, a) => sum + a.score, 0) / ATHLETES.length) * 10
-    ) / 10;
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [userRes, statusRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/auth/me/`, { credentials: "include" }),
+        fetch(`${API_BASE_URL}/api/auth/coach/status/`, { credentials: "include" }),
+      ]);
+
+      if (userRes.ok) setUser(await userRes.json());
+      if (statusRes.ok) setStatus(await statusRes.json());
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isApproved = status?.status === "approved";
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
-
-      <div className="flex flex-1">
-        <Sidebar />
-
-        <div className="flex-1 mx-auto w-full max-w-6xl px-6 py-6 space-y-5">
-          {/* Page header */}
-          <header className="space-y-1">
-            <h1 className="text-xl font-semibold text-gray-900">
-              Coach Dashboard
-            </h1>
+    <>
+      {/* Header */}
+      <header className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="px-8 py-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {isApproved ? "Welcome back!" : "Complete Your Profile"}
+            </h2>
             <p className="text-sm text-gray-500">
-              Manage and monitor your athletes.
+              {isApproved
+                ? "Manage your athletes and track their progress"
+                : "Upload your credentials to get started"}
             </p>
-          </header>
-
-          {/* Top summary row: original two cards + extra two */}
-          <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-            {/* Improving Performance card */}
-            <div className="col-span-1 md:col-span-1 xl:col-span-2 rounded-2xl border bg-emerald-50/70 p-5">
-              <div className="flex items-start justify-between">
+          </div>
+          <div className="flex items-center gap-3">
+            {user && (
+              <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                  {user.username?.[0]?.toUpperCase()}
+                </div>
                 <div>
-                  <p className="text-xs font-medium text-emerald-800">
-                    Improving Performance
-                  </p>
-                  <p className="mt-4 text-xl font-semibold text-emerald-900">
-                    {improving.length} Athletes
-                  </p>
-                </div>
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-xs text-emerald-700">
-                  ↗
-                </span>
-              </div>
-              <div className="mt-5 space-y-2 text-xs text-emerald-900">
-                {improving.map((a) => (
-                  <div
-                    key={a.id}
-                    className="flex items-center justify-between rounded-full bg-white/60 px-3 py-1"
-                  >
-                    <span>{a.name}</span>
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px]">
-                      {a.score}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Needs Attention card */}
-            <div className="col-span-1 md:col-span-1 xl:col-span-2 rounded-2xl border bg-rose-50/70 p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-medium text-rose-800">
-                    Needs Attention
-                  </p>
-                  <p className="mt-4 text-xl font-semibold text-rose-900">
-                    {needsAttention.length} Athletes
-                  </p>
-                </div>
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-rose-100 text-xs text-rose-700">
-                  ↘
-                </span>
-              </div>
-              <div className="mt-5 space-y-2 text-xs text-rose-900">
-                {needsAttention.map((a) => (
-                  <div
-                    key={a.id}
-                    className="flex items-center justify-between rounded-full bg-white/60 px-3 py-1"
-                  >
-                    <span>{a.name}</span>
-                    <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px]">
-                      {a.score}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Extra card: Squad Overview */}
-            <div className="col-span-1 rounded-2xl border bg-white p-5 shadow-sm">
-              <p className="text-xs font-medium text-gray-600">
-                Squad Overview
-              </p>
-              <p className="mt-3 text-2xl font-semibold text-gray-900">
-                {avgScore}/100
-              </p>
-              <p className="text-xs text-gray-500">Average performance score</p>
-              <div className="mt-4 space-y-1 text-xs text-gray-700">
-                <p>{improving.length} improving</p>
-                <p>{needsAttention.length} need attention</p>
-                <p>
-                  {ATHLETES.length - improving.length - needsAttention.length}{" "}
-                  stable
-                </p>
-              </div>
-            </div>
-
-            {/* Extra card: Latest Test Completion (static demo) */}
-            <div className="col-span-1 rounded-2xl border bg-white p-5 shadow-sm flex flex-col justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-600">
-                  Latest Test Completion
-                </p>
-                <p className="mt-3 text-sm font-semibold text-gray-900">
-                  Yo-Yo Endurance Test
-                </p>
-              </div>
-              <div className="mt-4 flex items-center gap-4">
-                <div className="relative h-16 w-16">
-                  <svg className="h-16 w-16">
-                    <circle
-                      className="text-gray-200"
-                      strokeWidth="6"
-                      stroke="currentColor"
-                      fill="transparent"
-                      r="24"
-                      cx="32"
-                      cy="32"
-                    />
-                    <circle
-                      className="text-gray-900"
-                      strokeWidth="6"
-                      stroke="currentColor"
-                      fill="transparent"
-                      r="24"
-                      cx="32"
-                      cy="32"
-                      strokeDasharray={2 * Math.PI * 24}
-                      strokeDashoffset={2 * Math.PI * 24 * (1 - 8 / 12)}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-semibold">8/12</span>
-                  </div>
-                </div>
-                <div className="text-xs text-gray-700 space-y-1">
-                  <p>
-                    <span className="inline-block h-2 w-2 rounded-full bg-gray-900 mr-1" />
-                    Completed: 8 athletes
-                  </p>
-                  <p>
-                    <span className="inline-block h-2 w-2 rounded-full bg-gray-300 mr-1" />
-                    Pending: 4 athletes
-                  </p>
+                  <p className="text-sm font-medium text-gray-900">{user.username}</p>
+                  <p className="text-xs text-gray-500">coach</p>
                 </div>
               </div>
-            </div>
-          </section>
-
-          {/* My Athletes table */}
-          <section className="rounded-2xl border bg-white p-5 shadow-sm">
-            <div className="mb-4">
-              <h2 className="text-sm font-semibold text-gray-900">
-                My Athletes
-              </h2>
-              <p className="text-xs text-gray-500">
-                Manage your assigned players.
-              </p>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-xs">
-                <thead className="border-b bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500">
-                  <tr>
-                    <th className="px-4 py-2 font-medium">Player Name</th>
-                    <th className="px-4 py-2 font-medium">Last Update</th>
-                    <th className="px-4 py-2 font-medium">Progress</th>
-                    <th className="px-4 py-2 font-medium">Score</th>
-                    <th className="px-4 py-2 font-medium text-right">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {ATHLETES.map((a) => (
-                    <tr key={a.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-gray-900 font-medium">
-                        {a.name}
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {a.lastUpdate}
-                      </td>
-                      <td className="px-4 py-3">
-                        <ProgressPill status={a.progress} />
-                      </td>
-                      <td className="px-4 py-3 text-gray-800">
-                        {a.score}/100
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => setSelectedAthlete(a)}
-                            className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] text-gray-800 hover:bg-gray-100"
-                          >
-                            <span>👁</span>
-                            View
-                          </button>
-                          <button className="inline-flex items-center gap-1 rounded-full bg-black px-3 py-1 text-[11px] font-medium text-white hover:bg-gray-900">
-                            💬 Feedback
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* Slide-over athlete detail */}
-          {selectedAthlete && (
-            <div className="fixed inset-0 z-40 flex">
-              {/* backdrop */}
-              <div
-                className="flex-1 bg-black/30"
-                onClick={() => setSelectedAthlete(null)}
-              />
-              {/* panel */}
-              <div className="w-full max-w-md bg-white shadow-xl border-l flex flex-col">
-                <div className="flex items-center justify-between border-b px-5 py-4">
-                  <div>
-                    <p className="text-xs text-gray-500">Athlete details</p>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {selectedAthlete.name}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setSelectedAthlete(null)}
-                    className="rounded-full border px-2 py-1 text-xs text-gray-600 hover:bg-gray-50"
-                  >
-                    Close
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 text-xs text-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] text-gray-500">Current score</p>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {selectedAthlete.score}/100
-                      </p>
-                    </div>
-                    <ProgressPill status={selectedAthlete.progress} />
-                  </div>
-
-                  <div className="rounded-xl bg-gray-50 p-3 space-y-2">
-                    <p className="text-[11px] font-semibold text-gray-600">
-                      Recent tests (demo)
-                    </p>
-                    <ul className="space-y-1">
-                      <li className="flex justify-between">
-                        <span>100m Sprint</span>
-                        <span>10.9 s</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>5K Run</span>
-                        <span>21:20</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>Yo-Yo Endurance</span>
-                        <span>17.3</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-[11px] font-semibold text-gray-600">
-                      Recent feedback
-                    </p>
-                    <div className="space-y-2">
-                      <div className="rounded-xl border px-3 py-2">
-                        <p className="text-[11px] text-gray-500">
-                          2 days ago
-                        </p>
-                        <p>Great improvement in start phase. Keep current warmup.</p>
-                      </div>
-                      <div className="rounded-xl border px-3 py-2">
-                        <p className="text-[11px] text-gray-500">
-                          1 week ago
-                        </p>
-                        <p>Focus on relaxation in mid-race, avoid overstriding.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t px-5 py-3 flex gap-2">
-                  <button className="flex-1 rounded-full border px-3 py-2 text-xs font-medium text-gray-800 hover:bg-gray-50">
-                    Add Feedback
-                  </button>
-                  <button className="flex-1 rounded-full bg-black px-3 py-2 text-xs font-medium text-white hover:bg-gray-900">
-                    Set New Goal
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+      </header>
+
+      {/* Content */}
+      <div className="p-8">
+        {/* Status Banner */}
+        {status && status.status === "pending" && status.credential_count === 0 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-yellow-900 mb-1">Action Required: Upload Credentials</h3>
+                <p className="text-sm text-yellow-700 mb-4">
+                  To become an approved coach, you need to upload your coaching credentials and certifications.
+                </p>
+                <button
+                  onClick={() => router.push("/dashboard/coach/credentials")}
+                  className="px-6 py-2.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-medium text-sm"
+                >
+                  Upload Credentials Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {status && status.status === "pending" && status.credential_count > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-blue-900 mb-1">Your application is under review</h3>
+                <p className="text-sm text-blue-700">
+                  Credentials submitted - awaiting admin review. You'll be notified once your application is processed.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {status && status.status === "approved" && (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-green-900 mb-1">You're approved!</h3>
+                <p className="text-sm text-green-700">
+                  Your coaching credentials have been verified. You can now access all coaching features.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {status && status.status === "rejected" && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-red-900 mb-1">Application Not Approved</h3>
+                <p className="text-sm text-red-700 mb-2">
+                  <strong>Reason:</strong> {status.rejection_reason}
+                </p>
+                <p className="text-sm text-red-700 mb-4">
+                  You can upload new credentials and resubmit for review.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => router.push("/dashboard/coach/credentials")}
+                    className="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-sm"
+                  >
+                    Upload New Credentials
+                  </button>
+                  <a
+                    href="mailto:support@smartathlete.com"
+                    className="px-6 py-2.5 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 font-medium text-sm"
+                  >
+                    Contact Support
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Dashboard Content */}
+        {isApproved ? (
+          <>
+            <div className="grid grid-cols-4 gap-6 mb-8">
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-500 mb-1">My Athletes</p>
+                <p className="text-3xl font-bold">5</p>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Improving</p>
+                <p className="text-3xl font-bold">3</p>
+                <p className="text-xs text-green-600 mt-1">athletes</p>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
+                  <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Needs Attention</p>
+                <p className="text-3xl font-bold">1</p>
+                <p className="text-xs text-gray-500 mt-1">athlete</p>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Feedback Given</p>
+                <p className="text-3xl font-bold">12</p>
+                <p className="text-xs text-gray-500 mt-1">this month</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm">
+              <div className="p-6 flex items-center justify-between border-b">
+                <h3 className="text-lg font-semibold">My Athletes</h3>
+                <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">View all</button>
+              </div>
+              <div className="p-6 text-center text-gray-500">
+                <p>Athlete management features coming soon</p>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Approval Required</h3>
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">
+              Your coaching features are currently locked. Please upload your credentials and wait for admin approval.
+            </p>
+            <button
+              onClick={() => router.push("/dashboard/coach/credentials")}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            >
+              Upload Credentials
+            </button>
+          </div>
+        )}
       </div>
-    </main>
+    </>
   );
 }

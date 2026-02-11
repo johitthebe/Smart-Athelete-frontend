@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import NotificationBell from "./NotificationBell";
+import { useRouter } from "next/navigation";
 
 type User = {
   id: number;
@@ -13,6 +15,7 @@ type User = {
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -28,6 +31,10 @@ export default function Navbar() {
   // choose dashboard path based on role if you want
   const dashboardHref =
     user?.role === "coach" ? "/dashboard/coach" : "/dashboard/player";
+
+  const handleViewCoach = (coachId: number) => {
+    router.push(`/admin/coaches/pending`);
+  };
 
   return (
     <header className="w-full border-b bg-white">
@@ -48,7 +55,11 @@ export default function Navbar() {
 
         {/* Right: icons + profile */}
         <div className="flex items-center gap-4">
-          <button className="rounded-full border p-2">🔔</button>
+          {user?.role === "admin" ? (
+            <NotificationBell onViewCoach={handleViewCoach} />
+          ) : (
+            <button className="rounded-full border p-2">🔔</button>
+          )}
           <Link href="/profile" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-full bg-gray-300" />
             <span className="text-sm font-medium">{displayName}</span>
