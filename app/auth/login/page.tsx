@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/config";
 
 export default function Login() {
   const router = useRouter();
@@ -22,16 +23,11 @@ export default function Login() {
     setError("");
 
     try {
-      // 1) Get CSRF cookie from Django
-      await fetch("http://localhost:8000/api/csrf/", {
-        method: "GET",
-        credentials: "include",
-      });
-
+      // Skip CSRF fetch for now and try direct login
       const csrfToken = getCookie("csrftoken");
 
-      // 2) Send login request (identifier = email or username)
-      const res = await fetch("http://localhost:8000/api/auth/login/", {
+      // Send login request
+      const res = await fetch("/api/auth/login/", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -41,44 +37,35 @@ export default function Login() {
         body: JSON.stringify({ identifier, password }),
       });
 
-      const text = await res.text();
-      let data: any = {};
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        // non‑JSON error page
-      }
-
-      if (res.ok) {
-        console.log("LOGIN DATA:", data);
-        console.log("ROLE VALUE:", data?.user?.role);
-
-        const role = data.user?.role;
-
-        // Redirect based on role
-        if (role === "admin") {
-          router.push("/admin");
-        } else if (role === "coach") {
-          router.push("/dashboard/coach");
-        } else if (role === "athlete") {
-          router.push("/dashboard/player");
-        } else {
-          // No role set yet → go to choose role page
-          router.push("/auth/choose-role");
-        }
-      } else {
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
         setError(data?.error || "Invalid credentials");
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      setError("Something went wrong. Try again.");
+
+      const data = await res.json();
+      const role = data.user?.role;
+
+      // Redirect based on role
+      if (role === "admin") {
+        router.push("/admin");
+      } else if (role === "coach" || role === "coach_pending") {
+        router.push("/dashboard/coach");
+      } else if (role === "athlete") {
+        router.push("/dashboard/player");
+      } else {
+        router.push("/auth/choose-role");
+      }
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setError("Login failed. Please try again.");
     }
   };
 
   const handleGoogleLogin = () => {
     // Start Google login; Django/allauth will redirect back to NEXT_URL
     window.location.href =
-      "http://127.0.0.1:8000/accounts/google/login/?next=/post-login";
+      `${API_BASE_URL}/accounts/google/login/?next=/post-login`;
   };
 
   return (

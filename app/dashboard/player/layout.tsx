@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
-import CoachNavbar from "@/app/component/CoachNavbar";
-import CoachSidebar from "@/app/component/coachsidebar";
+import PlayerNavbar from "@/app/component/PlayerNavbar";
+import PlayerSidebar from "@/app/component/PlayerSidebar";
 
-export default function CoachLayout({ children }: { children: React.ReactNode }) {
+export default function PlayerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
@@ -18,8 +18,8 @@ export default function CoachLayout({ children }: { children: React.ReactNode })
       const res = await fetch(`${API_BASE_URL}/api/auth/me/`, { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
-        if (data.role !== 'coach' && data.role !== 'coach_pending') {
-          router.push("/dashboard/player");
+        if (data.role !== 'athlete') {
+          router.push("/dashboard/coach");
         }
       } else {
         router.push("/auth/login");
@@ -31,9 +31,9 @@ export default function CoachLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <CoachSidebar />
+      <PlayerSidebar />
       <main className="flex-1 overflow-y-auto flex flex-col">
-        <CoachNavbar />
+        <PlayerNavbar />
         <div className="flex-1">
           {children}
         </div>

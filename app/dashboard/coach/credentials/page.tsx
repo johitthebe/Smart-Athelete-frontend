@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Navbar from "@/app/component/Navbar";
-import Sidebar from "@/app/component/coachsidebar";
 import { API_BASE_URL } from "@/lib/config";
 
 type Credential = {
@@ -155,11 +153,7 @@ export default function CoachCredentialsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
-      <div className="flex flex-1">
-        <Sidebar />
-        <div className="flex-1 mx-auto w-full max-w-6xl px-6 py-6 space-y-5">
+    <div className="mx-auto w-full max-w-6xl px-6 py-6 space-y-5">
           {/* Header */}
           <header>
             <h1 className="text-xl font-semibold text-gray-900">My Credentials</h1>
@@ -190,7 +184,7 @@ export default function CoachCredentialsPage() {
 
           {/* Upload Form */}
           {showUploadForm && (
-            <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-900 mb-4">Upload New Credential</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -294,7 +288,7 @@ export default function CoachCredentialsPage() {
           )}
 
           {/* Credentials List */}
-          <div className="rounded-2xl border bg-white p-5 shadow-sm">
+          <div className="rounded-2xl bg-white p-5 shadow-sm">
             <div className="mb-4">
               <h2 className="text-sm font-semibold text-gray-900">Uploaded Credentials</h2>
               <p className="text-xs text-gray-500">
@@ -377,7 +371,5 @@ export default function CoachCredentialsPage() {
             )}
           </div>
         </div>
-      </div>
-    </main>
   );
 }
