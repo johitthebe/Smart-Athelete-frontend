@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
+import { ensureCsrfToken, getFetchHeaders } from "@/lib/csrf";
 
 type Goal = {
   id: number;
@@ -45,6 +46,7 @@ export default function LogPerformancePage() {
   });
 
   useEffect(() => {
+    ensureCsrfToken();
     checkActiveGoals();
     fetchActivityTypes();
   }, []);
@@ -135,9 +137,7 @@ export default function LogPerformancePage() {
       const response = await fetch(`${API_BASE_URL}/api/performance/performance-logs/`, {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getFetchHeaders(),
         body: JSON.stringify(payload),
       });
 

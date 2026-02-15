@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "@/app/component/adminsidebar";
 import AdminNavbar from "@/app/component/AdminNavbar";
 import { API_BASE_URL } from "@/lib/config";
+import { ensureCsrfToken, getFetchHeaders } from "@/lib/csrf";
 
 type PendingCoach = {
   id: number;
@@ -36,6 +37,7 @@ export default function PendingCoachesPage() {
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
+    ensureCsrfToken();
     fetchPendingCoaches();
   }, []);
 
@@ -67,6 +69,7 @@ export default function PendingCoachesPage() {
       const response = await fetch(`${API_BASE_URL}/api/admin/coaches/${coachId}/approve/`, {
         method: "POST",
         credentials: "include",
+        headers: getFetchHeaders(),
       });
 
       const data = await response.json();
@@ -101,9 +104,7 @@ export default function PendingCoachesPage() {
       const response = await fetch(`${API_BASE_URL}/api/admin/coaches/${selectedCoach.coach}/reject/`, {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getFetchHeaders(),
         body: JSON.stringify({ rejection_reason: rejectionReason }),
       });
 

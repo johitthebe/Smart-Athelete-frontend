@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/lib/config";
+import { ensureCsrfToken, getFetchHeaders } from "@/lib/csrf";
 
 type Goal = {
   id: number;
@@ -53,6 +54,7 @@ export default function GoalsPage() {
   });
 
   useEffect(() => {
+    ensureCsrfToken();
     fetchGoals();
     fetchActivityTypes();
   }, []);
@@ -98,9 +100,7 @@ export default function GoalsPage() {
       const response = await fetch(`${API_BASE_URL}/api/performance/goals/`, {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getFetchHeaders(),
         body: JSON.stringify({
           ...formData,
           target_value: parseFloat(formData.target_value),
@@ -140,6 +140,7 @@ export default function GoalsPage() {
         {
           method: "POST",
           credentials: "include",
+          headers: getFetchHeaders(),
         }
       );
 
@@ -160,6 +161,7 @@ export default function GoalsPage() {
         {
           method: "DELETE",
           credentials: "include",
+          headers: getFetchHeaders(),
         }
       );
 
@@ -173,6 +175,7 @@ export default function GoalsPage() {
         {
           method: "DELETE",
           credentials: "include",
+          headers: getFetchHeaders(),
         }
       );
 

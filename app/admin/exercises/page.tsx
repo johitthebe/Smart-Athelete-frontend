@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "@/app/component/adminsidebar";
 import AdminNavbar from "@/app/component/AdminNavbar";
 import { API_BASE_URL } from "@/lib/config";
+import { ensureCsrfToken, getFetchHeaders } from "@/lib/csrf";
 
 type ActivityType = {
   id: number;
@@ -33,6 +34,7 @@ export default function AdminExercisesPage() {
   const commonIcons = ["🏃", "🚴", "🏊", "🏋️", "⚽", "🏀", "🎾", "⛳", "🧘", "🥊", "🤸", "🏐", "🏈", "⚾"];
 
   useEffect(() => {
+    ensureCsrfToken(); // Ensure CSRF token is available
     fetchExercises();
   }, []);
 
@@ -67,9 +69,7 @@ export default function AdminExercisesPage() {
       const response = await fetch(url, {
         method: editingExercise ? "PUT" : "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getFetchHeaders(),
         body: JSON.stringify(formData),
       });
 
@@ -120,6 +120,7 @@ export default function AdminExercisesPage() {
       const response = await fetch(`${API_BASE_URL}/api/admin/activity-types/${exercise.id}/`, {
         method: "DELETE",
         credentials: "include",
+        headers: getFetchHeaders(),
       });
 
       const data = await response.json();
