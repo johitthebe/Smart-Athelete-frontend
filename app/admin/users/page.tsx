@@ -24,11 +24,47 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [csrfToken, setCsrfToken] = useState("");
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    first_name: "",
+    last_name: "",
+    password: "",
+    role: "athlete",
+  });
 
   useEffect(() => {
     checkAuth();
+    fetchCSRF();
     fetchUsers();
   }, [filter]);
+
+  const fetchCSRF = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/csrf/", {
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // CSRF token is set in cookies, we just need to trigger the endpoint
+      }
+    } catch (err) {
+      console.error("Failed to fetch CSRF token:", err);
+    }
+  };
+
+  const getCSRFToken = () => {
+    const name = "csrftoken";
+    const cookies = document.cookie.split(";");
+    for (let cookie of cookies) {
+      const [key, value] = cookie.trim().split("=");
+      if (key === name) return value;
+    }
+    return "";
+  };
 
   const checkAuth = async () => {
     try {
@@ -86,8 +122,83 @@ export default function AdminUsersPage() {
     fetchUsers();
   };
 
+  const openCreateModal = () => {
+    setEditingUser(null);
+    setFormData({
+      username: "",
+      email: "",
+      first_name: "",
+      last_name: "",
+      password: "",
+      role: "athlete",
+    });
+    setShowModal(true);
+  };
+
+  const openEditModal = (user: User) => {
+    setEditingUser(user);
+    setFormData({
+      username: user.username,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      password: "",
+      role: user.role,
+    });
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const url = editingUser
+        ? `http://localhost:8000/api/admin/users/${editingUser.id}/`
+        : "http://localhost:8000/api/admin/users/";
+      
+      const method = editingUser ? "PUT" : "POST";
+      
+      const body = editingUser
+        ? {
+            username: formData.username,
+            email: formData.email,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            role: formData.role,
+            ...(formData.password && { password: formData.password }),
+          }
+        : formData;
+
+      const csrftoken = getCSRFToken();
+
+      const res = await fetch(url, {
+        method,
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrftoken,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        alert(editingUser ? "User updated successfully" : "User created successfully");
+        setShowModal(false);
+        fetchUsers();
+      } else {
+        const data = await res.json();
+        alert(JSON.stringify(data));
+      }
+    } catch (err) {
+      console.error("Failed to save user:", err);
+      alert("Failed to save user");
+    }
+  };
+
   const toggleUserActive = async (userId: number) => {
     try {
+      const csrftoken = getCSRFToken();
+      
       const res = await fetch(
         `http://localhost:8000/api/admin/users/${userId}/toggle_active/`,
         {
@@ -95,6 +206,7 @@ export default function AdminUsersPage() {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
           },
         }
       );
@@ -117,9 +229,14 @@ export default function AdminUsersPage() {
     }
 
     try {
+      const csrftoken = getCSRFToken();
+      
       const res = await fetch(`http://localhost:8000/api/admin/users/${userId}/`, {
         method: "DELETE",
         credentials: "include",
+        headers: {
+          "X-CSRFToken": csrftoken,
+        },
       });
 
       if (res.ok) {
@@ -203,7 +320,10 @@ export default function AdminUsersPage() {
 
             {/* Add User Button */}
             <div>
-              <button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 whitespace-nowrap">
+              <button 
+                onClick={openCreateModal}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 whitespace-nowrap"
+              >
                 + Add User
               </button>
             </div>
@@ -286,8 +406,14 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-6 py-4 text-right text-sm">
                         <button
-                          onClick={() => toggleUserActive(user.id)}
+                          onClick={() => openEditModal(user)}
                           className="text-blue-600 hover:text-blue-900 mr-3"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => toggleUserActive(user.id)}
+                          className="text-orange-600 hover:text-orange-900 mr-3"
                         >
                           {user.is_active ? "Deactivate" : "Activate"}
                         </button>
@@ -307,6 +433,126 @@ export default function AdminUsersPage() {
         </div>
       </main>
       </div>
+
+      {/* Create/Edit User Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl">
+            <div className="flex items-center justify-between border-b px-6 py-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {editingUser ? "Edit User" : "Create New User"}
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="rounded-full border px-3 py-1 text-xs text-gray-600 hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Username *
+                </label>
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                  required
+                  disabled={!!editingUser}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.first_name}
+                    onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.last_name}
+                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password {editingUser && "(leave blank to keep current)"}
+                </label>
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                  required={!editingUser}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role *
+                </label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                  required
+                >
+                  <option value="athlete">Athlete</option>
+                  <option value="coach">Coach</option>
+                  <option value="coach_pending">Coach Pending</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <button
+                  type="submit"
+                  className="flex-1 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                >
+                  {editingUser ? "Update User" : "Create User"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
