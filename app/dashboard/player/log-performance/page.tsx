@@ -36,11 +36,7 @@ export default function LogPerformancePage() {
     date: new Date().toISOString().split("T")[0],
     duration: "",
     distance: "",
-    heart_rate: "",
     calories: "",
-    power: "",
-    pace: "",
-    elevation: "",
     intensity: "5",
     notes: "",
   });
@@ -128,11 +124,7 @@ export default function LogPerformancePage() {
 
       if (formData.duration) payload.duration = parseInt(formData.duration);
       if (formData.distance) payload.distance = parseFloat(formData.distance);
-      if (formData.heart_rate) payload.heart_rate = parseInt(formData.heart_rate);
       if (formData.calories) payload.calories = parseInt(formData.calories);
-      if (formData.power) payload.power = parseInt(formData.power);
-      if (formData.pace) payload.pace = parseFloat(formData.pace);
-      if (formData.elevation) payload.elevation = parseInt(formData.elevation);
 
       const response = await fetch(`${API_BASE_URL}/api/performance/performance-logs/`, {
         method: "POST",
@@ -151,11 +143,7 @@ export default function LogPerformancePage() {
           date: new Date().toISOString().split("T")[0],
           duration: "",
           distance: "",
-          heart_rate: "",
           calories: "",
-          power: "",
-          pace: "",
-          elevation: "",
           intensity: "5",
           notes: "",
         });
@@ -311,20 +299,6 @@ export default function LogPerformancePage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Heart Rate (BPM)
-              </label>
-              <input
-                type="number"
-                value={formData.heart_rate}
-                onChange={(e) => setFormData({ ...formData, heart_rate: e.target.value })}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
-                placeholder="e.g., 145"
-                min="0"
-              />
-            </div>
-
-            <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Calories</label>
               <input
                 type="number"
@@ -332,47 +306,6 @@ export default function LogPerformancePage() {
                 onChange={(e) => setFormData({ ...formData, calories: e.target.value })}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
                 placeholder="e.g., 350"
-                min="0"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Power (watts)</label>
-              <input
-                type="number"
-                value={formData.power}
-                onChange={(e) => setFormData({ ...formData, power: e.target.value })}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
-                placeholder="e.g., 200"
-                min="0"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Pace (min/km)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.pace}
-                onChange={(e) => setFormData({ ...formData, pace: e.target.value })}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
-                placeholder="e.g., 5.5"
-                min="0"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Elevation (meters)
-              </label>
-              <input
-                type="number"
-                value={formData.elevation}
-                onChange={(e) => setFormData({ ...formData, elevation: e.target.value })}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
-                placeholder="e.g., 100"
                 min="0"
               />
             </div>
