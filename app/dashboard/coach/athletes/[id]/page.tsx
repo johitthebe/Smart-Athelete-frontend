@@ -55,6 +55,8 @@ export default function AthleteProfilePage() {
   });
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState("");
+  const [feedbackTitle, setFeedbackTitle] = useState("");
+  const [feedbackType, setFeedbackType] = useState("general");
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
 
   useEffect(() => {
@@ -108,12 +110,40 @@ export default function AthleteProfilePage() {
   };
 
   const handleSendFeedback = async () => {
-    if (!feedback.trim()) return;
+    if (!feedback.trim() || !feedbackTitle.trim()) {
+      alert("Please provide both title and message");
+      return;
+    }
 
-    // TODO: Implement feedback API
-    alert("Feedback sent successfully!");
-    setFeedback("");
-    setShowFeedbackForm(false);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/performance/feedback/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          athlete: athleteId,
+          feedback_type: feedbackType,
+          title: feedbackTitle,
+          message: feedback,
+        }),
+      });
+
+      if (response.ok) {
+        alert("Feedback sent successfully!");
+        setFeedback("");
+        setFeedbackTitle("");
+        setFeedbackType("general");
+        setShowFeedbackForm(false);
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || "Failed to send feedback"}`);
+      }
+    } catch (err) {
+      console.error("Error sending feedback:", err);
+      alert("Failed to send feedback. Please try again.");
+    }
   };
 
   const getIntensityStars = (intensity: number) => {
@@ -190,24 +220,68 @@ export default function AthleteProfilePage() {
       {/* Feedback Form */}
       {showFeedbackForm && (
         <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-900 mb-3">Send Feedback</h2>
-          <textarea
-            value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
-            rows={4}
-            placeholder="Write your feedback here..."
-          />
-          <div className="flex gap-2 mt-3">
+          <h2 className="text-sm font-semibold text-gray-900 mb-4">Send Feedback to {displayName}</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Feedback Type
+              </label>
+              <select
+                value={feedbackType}
+                onChange={(e) => setFeedbackType(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="general">General Feedback</option>
+                <option value="performance">Performance Review</option>
+                <option value="goal">Goal-Specific</option>
+                <option value="technique">Technique Improvement</option>
+                <option value="motivation">Motivational</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Title
+              </label>
+              <input
+                type="text"
+                value={feedbackTitle}
+                onChange={(e) => setFeedbackTitle(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="Brief title for your feedback..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Message
+              </label>
+              <textarea
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                rows={6}
+                placeholder="Write your detailed feedback here..."
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 mt-4">
             <button
               onClick={handleSendFeedback}
-              className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
+              className="rounded-full bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700"
             >
               Send Feedback
             </button>
             <button
-              onClick={() => setShowFeedbackForm(false)}
-              className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              onClick={() => {
+                setShowFeedbackForm(false);
+                setFeedback("");
+                setFeedbackTitle("");
+                setFeedbackType("general");
+              }}
+              className="rounded-full border border-gray-300 px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               Cancel
             </button>
