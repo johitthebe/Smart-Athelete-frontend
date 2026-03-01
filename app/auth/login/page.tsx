@@ -127,8 +127,8 @@ export default function Login() {
               className="w-full px-3 py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[#173B80]"
             />
             <div className="mt-2 text-right">
-              <a href="#" className="text-xs text-[#173B80] hover:underline">
-                Forget Password
+              <a href="/auth/forgot-password" className="text-xs text-[#173B80] hover:underline">
+                Forgot Password?
               </a>
             </div>
           </div>
