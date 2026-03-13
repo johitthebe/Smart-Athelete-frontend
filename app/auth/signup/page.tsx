@@ -26,16 +26,16 @@ export default function Signup() {
     setError("");
 
     try {
-      // 1) Get CSRF cookie from Django
-      await fetch("http://localhost:8000/api/csrf/", {
+      // 1) Get CSRF cookie from Django via proxy
+      await fetch("/api/csrf/", {
         method: "GET",
         credentials: "include",
       });
 
       const csrfToken = getCookie("csrftoken");
 
-      // 2) Send register request with CSRF + cookies
-      const res = await fetch("http://localhost:8000/api/auth/register/", {
+      // 2) Send register request with CSRF + cookies via proxy
+      const res = await fetch("/api/auth/register/", {
         method: "POST",
         credentials: "include",
         headers: {

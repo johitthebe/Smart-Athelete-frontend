@@ -48,9 +48,10 @@ export default function CoachDashboardPage() {
       if (statusRes.ok) setStatus(await statusRes.json());
       if (athletesRes.ok) {
         const data = await athletesRes.json();
-        setAthletes(data.athletes || []);
-        if (data.athletes && data.athletes.length > 0) {
-          setSelectedAthlete(data.athletes[0]);
+        console.log("Athletes data:", data);
+        setAthletes(data);
+        if (data && data.length > 0) {
+          setSelectedAthlete(data[0]);
         }
       }
     } catch (err) {

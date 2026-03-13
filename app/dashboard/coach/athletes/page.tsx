@@ -4,6 +4,16 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
 
+type Assignment = {
+  id: number;
+  athlete: number;
+  athlete_name: string;
+  athlete_email: string;
+  athlete_username: string;
+  assigned_at: string;
+  is_active: boolean;
+};
+
 type Athlete = {
   id: number;
   username: string;
@@ -25,13 +35,27 @@ export default function AthletesListPage() {
 
   const fetchAthletes = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/users/?role=athlete`, {
+      const response = await fetch("/api/coach/athletes/", {
         credentials: "include",
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setAthletes(data);
+        const data: Assignment[] = await response.json();
+        // Transform assignment data to athlete format
+        const athletesList: Athlete[] = data.map((assignment) => {
+          const [firstName, ...lastNameParts] = (assignment.athlete_name || '').split(' ');
+          return {
+            id: assignment.athlete,
+            username: assignment.athlete_username,
+            first_name: firstName || '',
+            last_name: lastNameParts.join(' ') || '',
+            email: assignment.athlete_email,
+            date_joined: assignment.assigned_at,
+          };
+        });
+        setAthletes(athletesList);
+      } else {
+        console.error("Failed to fetch athletes:", response.status);
       }
     } catch (err) {
       console.error("Error fetching athletes:", err);
@@ -102,13 +126,15 @@ export default function AthletesListPage() {
                     athlete.first_name || athlete.last_name
                       ? `${athlete.first_name} ${athlete.last_name}`.trim()
                       : athlete.username;
+                  
+                  const initial = displayName ? displayName[0]?.toUpperCase() : '?';
 
                   return (
                     <tr key={athlete.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                            {displayName[0]?.toUpperCase()}
+                            {initial}
                           </div>
                           <div>
                             <p className="font-medium text-gray-900">{displayName}</p>
@@ -128,7 +154,10 @@ export default function AthletesListPage() {
                           >
                             View Profile
                           </button>
-                          <button className="rounded-full border border-blue-300 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50">
+                          <button
+                            onClick={() => router.push(`/dashboard/coach/messages?compose=true&athlete=${athlete.id}`)}
+                            className="rounded-full border border-blue-300 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50"
+                          >
                             Message
                           </button>
                         </div>

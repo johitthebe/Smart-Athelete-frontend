@@ -23,10 +23,14 @@ export default function Login() {
     setError("");
 
     try {
+      console.log("🔐 Attempting login...");
+      console.log("Current URL:", window.location.href);
+      console.log("Cookies before login:", document.cookie);
+      
       // Skip CSRF fetch for now and try direct login
       const csrfToken = getCookie("csrftoken");
 
-      // Send login request
+      // Send login request via Next.js proxy (same domain)
       const res = await fetch("/api/auth/login/", {
         method: "POST",
         credentials: "include",
@@ -37,13 +41,20 @@ export default function Login() {
         body: JSON.stringify({ identifier, password }),
       });
 
+      console.log("Login response status:", res.status);
+      console.log("Cookies after login:", document.cookie);
+
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        console.error("Login failed:", data);
         setError(data?.error || "Invalid credentials");
         return;
       }
 
       const data = await res.json();
+      console.log("Login successful:", data);
+      console.log("Session cookie present?", document.cookie.includes("sessionid"));
+      
       const role = data.user?.role;
 
       // Redirect based on role

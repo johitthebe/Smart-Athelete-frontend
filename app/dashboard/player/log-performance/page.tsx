@@ -167,8 +167,8 @@ export default function LogPerformancePage() {
 
   if (!hasActiveGoals) {
     return (
-      <div className="mx-auto w-full max-w-6xl px-6 py-6">
-        <div className="rounded-2xl bg-yellow-50 border border-yellow-200 p-8 text-center">
+      <div className="mx-auto w-full max-w-6xl px-8 py-6">
+        <div className="rounded-xl bg-yellow-50 border border-yellow-200 p-8 text-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
               className="w-8 h-8 text-yellow-600"
@@ -184,14 +184,14 @@ export default function LogPerformancePage() {
               />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Create a Goal First</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Create a Goal First</h2>
           <p className="text-sm text-gray-600 mb-6">
             You need to create at least one active goal before you can log performance. Goals help
             you track your progress and stay motivated!
           </p>
           <button
             onClick={() => router.push("/dashboard/player/goals")}
-            className="rounded-full bg-black px-6 py-2 text-sm font-medium text-white hover:bg-gray-900"
+            className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
           >
             Create Your First Goal
           </button>
@@ -201,25 +201,35 @@ export default function LogPerformancePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-6 space-y-5">
+    <div className="mx-auto w-full max-w-6xl px-8 py-6 space-y-6">
       <header>
-        <h1 className="text-xl font-semibold text-gray-900">Log Performance</h1>
-        <p className="text-sm text-gray-500">Record your training activity</p>
+        <h1 className="text-2xl font-bold text-gray-900">Log Performance</h1>
+        <p className="text-sm text-gray-500 mt-1">Record your training activity</p>
       </header>
 
       {success && (
         <div className="rounded-xl bg-green-50 border border-green-200 p-4">
-          <p className="text-sm text-green-800">{success}</p>
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-green-800">{success}</p>
+          </div>
         </div>
       )}
 
       {error && (
         <div className="rounded-xl bg-red-50 border border-red-200 p-4">
-          <p className="text-sm text-red-800">{error}</p>
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
         </div>
       )}
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -336,18 +346,18 @@ export default function LogPerformancePage() {
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-full bg-black px-6 py-2 text-sm font-medium text-white hover:bg-gray-900 disabled:bg-gray-400"
+              className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-gray-400"
             >
               {submitting ? "Logging..." : "Log Performance"}
             </button>
             <button
               type="button"
               onClick={() => router.push("/dashboard/player")}
-              className="rounded-full border border-gray-300 px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               Cancel
             </button>

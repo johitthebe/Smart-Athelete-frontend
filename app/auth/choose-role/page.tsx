@@ -14,10 +14,10 @@ export default function ChooseRole() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch current user from backend
+    // Fetch current user from backend via proxy
     const fetchUser = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/auth/me/", {
+        const res = await fetch("/api/auth/me/", {
           method: "GET",
           credentials: "include",
         });
@@ -74,16 +74,16 @@ export default function ChooseRole() {
         return null;
       };
 
-      // Fetch CSRF cookie first
-      await fetch("http://localhost:8000/api/csrf/", {
+      // Fetch CSRF cookie first via proxy
+      await fetch("/api/csrf/", {
         method: "GET",
         credentials: "include",
       });
 
       const csrfToken = getCookie("csrftoken");
 
-      // Call set-my-role endpoint
-      const res = await fetch("http://localhost:8000/api/auth/set-my-role/", {
+      // Call set-my-role endpoint via proxy
+      const res = await fetch("/api/auth/set-my-role/", {
         method: "POST",
         credentials: "include",
         headers: {

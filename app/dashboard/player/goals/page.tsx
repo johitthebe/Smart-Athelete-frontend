@@ -198,15 +198,15 @@ export default function GoalsPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-6 space-y-5">
+    <div className="mx-auto w-full max-w-6xl px-8 py-6 space-y-6">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">My Goals</h1>
-          <p className="text-sm text-gray-500">Track your training objectives</p>
+          <h1 className="text-2xl font-bold text-gray-900">My Goals</h1>
+          <p className="text-sm text-gray-500 mt-1">Track your training objectives</p>
         </div>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
+          className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
         >
           {showCreateForm ? "Cancel" : "+ Create Goal"}
         </button>
@@ -214,19 +214,29 @@ export default function GoalsPage() {
 
       {success && (
         <div className="rounded-xl bg-green-50 border border-green-200 p-4">
-          <p className="text-sm text-green-800">{success}</p>
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-green-800">{success}</p>
+          </div>
         </div>
       )}
 
       {error && (
         <div className="rounded-xl bg-red-50 border border-red-200 p-4">
-          <p className="text-sm text-red-800">{error}</p>
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
         </div>
       )}
 
       {showCreateForm && (
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-900 mb-4">Create New Goal</h2>
+        <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Create New Goal</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -333,17 +343,17 @@ export default function GoalsPage() {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
                 type="submit"
-                className="rounded-full bg-black px-6 py-2 text-sm font-medium text-white hover:bg-gray-900"
+                className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
               >
                 Create Goal
               </button>
               <button
                 type="button"
                 onClick={() => setShowCreateForm(false)}
-                className="rounded-full border border-gray-300 px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
@@ -352,22 +362,31 @@ export default function GoalsPage() {
         </div>
       )}
 
-      <div className="rounded-2xl bg-white p-5 shadow-sm">
+      <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100">
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-900">All Goals</h2>
-          <p className="text-xs text-gray-500">
+          <h2 className="text-lg font-semibold text-gray-900">All Goals</h2>
+          <p className="text-sm text-gray-500">
             {goals.length} goal{goals.length !== 1 ? "s" : ""}
           </p>
         </div>
 
         {loading ? (
-          <p className="text-sm text-gray-500">Loading...</p>
+          <div className="text-center py-12">
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-500">Loading goals...</p>
+          </div>
         ) : goals.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-sm text-gray-500 mb-4">No goals yet</p>
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="text-base font-medium text-gray-900 mb-1">No goals yet</p>
+            <p className="text-sm text-gray-500 mb-4">Create your first goal to start tracking your progress</p>
             <button
               onClick={() => setShowCreateForm(true)}
-              className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
+              className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
             >
               Create Your First Goal
             </button>
@@ -404,18 +423,18 @@ export default function GoalsPage() {
                       <span>{goal.log_count} logs</span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     {goal.status === "active" && (
                       <button
                         onClick={() => handleMarkComplete(goal.id)}
-                        className="rounded-full border border-green-300 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-50"
+                        className="rounded-lg border border-green-300 px-4 py-2 text-sm font-medium text-green-700 hover:bg-green-50"
                       >
                         Complete
                       </button>
                     )}
                     <button
                       onClick={() => handleDelete(goal.id)}
-                      className="rounded-full border border-red-300 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
+                      className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
                     >
                       Delete
                     </button>
