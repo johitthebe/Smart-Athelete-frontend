@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/config";
 import NotificationBell from "./NotificationBell";
 
 type User = {
@@ -23,7 +24,7 @@ export default function AdminNavbar() {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/auth/me/", { 
+      const res = await fetch(`${API_BASE_URL}/api/auth/me/`, { 
         credentials: "include" 
       });
       if (res.ok) {
@@ -38,7 +39,7 @@ export default function AdminNavbar() {
   const handleLogout = async () => {
     if (confirm("Logout?")) {
       try {
-        await fetch("http://localhost:8000/api/logout/", {
+        await fetch(`${API_BASE_URL}/api/logout/`, {
           method: "POST",
           credentials: "include",
         });

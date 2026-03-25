@@ -92,7 +92,7 @@ export default function NotificationBell({ onViewCoach }: NotificationBellProps)
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="relative rounded-full border p-2 hover:bg-gray-50"
+        className="relative rounded-full p-2 hover:bg-gray-50"
       >
         <svg
           className="h-5 w-5 text-gray-600"
@@ -115,8 +115,8 @@ export default function NotificationBell({ onViewCoach }: NotificationBellProps)
       </button>
 
       {showDropdown && (
-        <div className="absolute right-0 mt-2 w-96 rounded-xl border bg-white shadow-lg z-50">
-          <div className="border-b px-4 py-3">
+        <div className="absolute right-0 mt-2 w-96 rounded-xl bg-white shadow-lg z-50">
+          <div className="px-4 py-3 border-b border-gray-100">
             <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
             <p className="text-xs text-gray-500">
               {unreadCount} unread notification{unreadCount !== 1 ? "s" : ""}

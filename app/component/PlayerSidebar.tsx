@@ -2,38 +2,27 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/lib/config";
 
 export default function PlayerSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [unreadFeedbackCount, setUnreadFeedbackCount] = useState(0);
-  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
   useEffect(() => {
     fetchUnreadCounts();
-    // Poll every 30 seconds
     const interval = setInterval(fetchUnreadCounts, 30000);
     return () => clearInterval(interval);
   }, []);
 
   const fetchUnreadCounts = async () => {
     try {
-      // Fetch unread feedback count
-      const feedbackRes = await fetch("/api/performance/feedback/unread/", {
+      const feedbackRes = await fetch(`${API_BASE_URL}/api/performance/feedback/unread/`, {
         credentials: "include",
       });
       if (feedbackRes.ok) {
         const feedbackData = await feedbackRes.json();
         setUnreadFeedbackCount(feedbackData.count || 0);
-      }
-
-      // Fetch unread notification count
-      const notifRes = await fetch("/api/notifications/unread_count/", {
-        credentials: "include",
-      });
-      if (notifRes.ok) {
-        const notifData = await notifRes.json();
-        setUnreadNotificationCount(notifData.unread_count || 0);
       }
     } catch (error) {
       console.error("Error fetching unread counts:", error);
@@ -42,7 +31,8 @@ export default function PlayerSidebar() {
 
   const navItems = [
     { href: "/dashboard/player", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-    { href: "/dashboard/player/notifications", label: "Notifications", icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" },
+    { href: "/dashboard/player/coaches", label: "Browse Coaches", icon: "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
+    { href: "/dashboard/player/my-requests", label: "My Requests", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
     { href: "/dashboard/player/benchmarks", label: "Benchmarks", icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" },
     { href: "/dashboard/player/goals", label: "My Goals", icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
     { href: "/dashboard/player/log-performance", label: "Log Performance", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
@@ -83,11 +73,6 @@ export default function PlayerSidebar() {
               {item.href === "/dashboard/player/feedback" && unreadFeedbackCount > 0 && (
                 <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                   {unreadFeedbackCount}
-                </span>
-              )}
-              {item.href === "/dashboard/player/notifications" && unreadNotificationCount > 0 && (
-                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                  {unreadNotificationCount}
                 </span>
               )}
             </button>
