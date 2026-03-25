@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/config";
 
 interface GoalSuggestion {
   id: number;
@@ -41,15 +42,28 @@ export default function AISuggestionsPage() {
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    fetchSuggestions();
+    checkAuthAndFetch();
   }, [activeTab]);
+
+  const checkAuthAndFetch = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/me/`, { credentials: "include" });
+      if (!res.ok) {
+        window.location.href = "/auth/login";
+        return;
+      }
+      fetchSuggestions();
+    } catch {
+      window.location.href = "/auth/login";
+    }
+  };
 
   const fetchSuggestions = async () => {
     setLoading(true);
 
     try {
       if (activeTab === "goals") {
-        const response = await fetch("/api/performance/ai/goal-suggestions/pending/", {
+        const response = await fetch(`${API_BASE_URL}/api/performance/ai/goal-suggestions/pending/`, {
           credentials: "include",
         });
         if (response.ok) {
@@ -58,7 +72,7 @@ export default function AISuggestionsPage() {
         }
       } else {
         // Fetch ALL workout suggestions (suggested + added_to_plan)
-        const response = await fetch("/api/performance/ai/workout-suggestions/active/", {
+        const response = await fetch(`${API_BASE_URL}/api/performance/ai/workout-suggestions/active/`, {
           credentials: "include",
         });
         if (response.ok) {
@@ -75,22 +89,14 @@ export default function AISuggestionsPage() {
 
   const generateGoalSuggestions = async () => {
     setGenerating(true);
-
     try {
-      console.log("Calling API:", "/api/performance/ai/goal-suggestions/generate/");
-      
-      // Get CSRF token - fetch it first if not present
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
-      
       if (!csrfToken) {
-        console.log("CSRF token not found, fetching...");
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
       
-      console.log("CSRF Token:", csrfToken ? "Present" : "Missing");
-      
-      const response = await fetch("/api/performance/ai/goal-suggestions/generate/", {
+      const response = await fetch(`${API_BASE_URL}/api/performance/ai/goal-suggestions/generate/`, {
         method: "POST",
         credentials: "include",
         headers: { 
@@ -99,19 +105,29 @@ export default function AISuggestionsPage() {
         },
       });
 
-      console.log("Response status:", response.status);
+      if (response.status === 401 || response.status === 403) {
+        alert("Session expired. Please log in again.");
+        window.location.href = "/auth/login";
+        return;
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        alert("Session expired. Please log in again.");
+        window.location.href = "/auth/login";
+        return;
+      }
+
       const data = await response.json();
-      console.log("Response data:", data);
 
       if (response.ok) {
         setGoalSuggestions(data.suggestions);
-        alert("Successfully generated suggestions!");
       } else {
-        alert(`Failed to generate suggestions. Error: ${data.detail || data.error || JSON.stringify(data)}`);
+        alert(`Failed to generate suggestions: ${data.detail || data.error || "Unknown error"}`);
       }
     } catch (error: any) {
       console.error("Error generating suggestions:", error);
-      alert(`Error: ${error.message}. Make sure you're logged in.`);
+      alert("Failed to generate suggestions. Please try again.");
     } finally {
       setGenerating(false);
     }
@@ -119,22 +135,14 @@ export default function AISuggestionsPage() {
 
   const generateWorkoutSuggestions = async () => {
     setGenerating(true);
-
     try {
-      console.log("Calling API:", "/api/performance/ai/workout-suggestions/generate/");
-      
-      // Get CSRF token - fetch it first if not present
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
-      
       if (!csrfToken) {
-        console.log("CSRF token not found, fetching...");
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
       
-      console.log("CSRF Token:", csrfToken ? "Present" : "Missing");
-      
-      const response = await fetch("/api/performance/ai/workout-suggestions/generate/", {
+      const response = await fetch(`${API_BASE_URL}/api/performance/ai/workout-suggestions/generate/`, {
         method: "POST",
         credentials: "include",
         headers: { 
@@ -143,19 +151,29 @@ export default function AISuggestionsPage() {
         },
       });
 
-      console.log("Response status:", response.status);
+      if (response.status === 401 || response.status === 403) {
+        alert("Session expired. Please log in again.");
+        window.location.href = "/auth/login";
+        return;
+      }
+
+      const contentType2 = response.headers.get("content-type");
+      if (!contentType2 || !contentType2.includes("application/json")) {
+        alert("Session expired. Please log in again.");
+        window.location.href = "/auth/login";
+        return;
+      }
+
       const data = await response.json();
-      console.log("Response data:", data);
 
       if (response.ok) {
         setWorkoutSuggestions(data.suggestions);
-        alert("Successfully generated suggestions!");
       } else {
-        alert(`Failed to generate suggestions. Error: ${data.detail || data.error || JSON.stringify(data)}`);
+        alert(`Failed to generate suggestions: ${data.detail || data.error || "Unknown error"}`);
       }
     } catch (error: any) {
       console.error("Error generating suggestions:", error);
-      alert(`Error: ${error.message}. Make sure you're logged in.`);
+      alert("Failed to generate suggestions. Please try again.");
     } finally {
       setGenerating(false);
     }
@@ -167,11 +185,11 @@ export default function AISuggestionsPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
       
-      const response = await fetch(`/api/performance/ai/goal-suggestions/${id}/accept/`, {
+      const response = await fetch(`${API_BASE_URL}/api/performance/ai/goal-suggestions/${id}/accept/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -185,7 +203,7 @@ export default function AISuggestionsPage() {
         alert("Goal accepted and added to your goals!");
         fetchSuggestions();
       } else {
-        alert(`Error: ${data.error || JSON.stringify(data)}`);
+        alert(`Error: ${data.error || "Failed to accept goal"}`);
       }
     } catch (error) {
       console.error("Error accepting goal:", error);
@@ -199,11 +217,11 @@ export default function AISuggestionsPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
       
-      const response = await fetch(`/api/performance/ai/goal-suggestions/${id}/reject/`, {
+      const response = await fetch(`${API_BASE_URL}/api/performance/ai/goal-suggestions/${id}/reject/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -225,11 +243,11 @@ export default function AISuggestionsPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
       
-      const response = await fetch(`/api/performance/ai/workout-suggestions/${id}/add_to_plan/`, {
+      const response = await fetch(`${API_BASE_URL}/api/performance/ai/workout-suggestions/${id}/add_to_plan/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -243,7 +261,7 @@ export default function AISuggestionsPage() {
         alert("Workout added to your training plan!");
         fetchSuggestions();
       } else {
-        alert(`Error: ${data.error || JSON.stringify(data)}`);
+        alert(`Error: ${data.error || "Failed to add workout"}`);
       }
     } catch (error) {
       console.error("Error adding workout:", error);
@@ -257,11 +275,11 @@ export default function AISuggestionsPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
       
-      const response = await fetch(`/api/performance/ai/workout-suggestions/${id}/dismiss/`, {
+      const response = await fetch(`${API_BASE_URL}/api/performance/ai/workout-suggestions/${id}/dismiss/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -286,13 +304,13 @@ export default function AISuggestionsPage() {
     }
   };
 
-  const getWorkoutTypeIcon = (type: string) => {
+  const getWorkoutTypeLabel = (type: string) => {
     switch (type) {
-      case "recovery": return "🧘";
-      case "endurance": return "🏃";
-      case "intervals": return "⚡";
-      case "speed": return "🚀";
-      default: return "💪";
+      case "recovery": return "Recovery";
+      case "endurance": return "Endurance";
+      case "intervals": return "Intervals";
+      case "speed": return "Speed";
+      default: return "Workout";
     }
   };
 
@@ -313,7 +331,7 @@ export default function AISuggestionsPage() {
                 : "bg-white text-gray-700 hover:bg-gray-50"
             }`}
           >
-            🎯 Goal Suggestions
+            Goal Suggestions
           </button>
           <button
             onClick={() => setActiveTab("workouts")}
@@ -323,7 +341,7 @@ export default function AISuggestionsPage() {
                 : "bg-white text-gray-700 hover:bg-gray-50"
             }`}
           >
-            💪 Workout Suggestions
+            Workout Suggestions
           </button>
         </div>
 
@@ -369,21 +387,21 @@ export default function AISuggestionsPage() {
                             {suggestion.difficulty_level}
                           </span>
                         </div>
-                        <p className="text-gray-600">⏱️ {suggestion.deadline_weeks} weeks</p>
+                        <p className="text-gray-600">{suggestion.deadline_weeks} weeks</p>
                       </div>
                     </div>
 
                     <div className="space-y-3 mb-6">
                       <div>
-                        <p className="text-sm font-medium text-gray-700">💡 Why this goal?</p>
+                        <p className="text-sm font-medium text-gray-700">Why this goal?</p>
                         <p className="text-gray-600">{suggestion.reasoning}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">🏋️ Training Required</p>
+                        <p className="text-sm font-medium text-gray-700">Training Required</p>
                         <p className="text-gray-600">{suggestion.training_required}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">✨ Key Tip</p>
+                        <p className="text-sm font-medium text-gray-700">Key Tip</p>
                         <p className="text-gray-600">{suggestion.key_tip}</p>
                       </div>
                     </div>
@@ -393,13 +411,13 @@ export default function AISuggestionsPage() {
                         onClick={() => acceptGoal(suggestion.id)}
                         className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                       >
-                        ✅ Accept Goal
+                        Accept Goal
                       </button>
                       <button
                         onClick={() => rejectGoal(suggestion.id)}
                         className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
                       >
-                        ❌ Not Interested
+                        Not Interested
                       </button>
                     </div>
                   </div>
@@ -442,14 +460,14 @@ export default function AISuggestionsPage() {
                 {/* Suggested Workouts */}
                 {workoutSuggestions.filter(w => w.status === "suggested").length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">💡 New Suggestions</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">New Suggestions</h3>
                     <div className="grid gap-6">
                       {workoutSuggestions.filter(w => w.status === "suggested").map((suggestion) => (
                         <div key={suggestion.id} className="bg-white rounded-lg shadow p-6">
                           <div className="flex justify-between items-start mb-4">
                             <div>
                               <div className="flex items-center gap-3 mb-2">
-                                <span className="text-3xl">{getWorkoutTypeIcon(suggestion.workout_type)}</span>
+                                <span className="text-sm font-medium text-gray-500 uppercase">{getWorkoutTypeLabel(suggestion.workout_type)}</span>
                                 <div>
                                   <h3 className="text-xl font-semibold text-gray-900">{suggestion.name}</h3>
                                   <p className="text-gray-600 text-sm">
@@ -465,15 +483,15 @@ export default function AISuggestionsPage() {
 
                           <div className="space-y-3 mb-6">
                             <div>
-                              <p className="text-sm font-medium text-gray-700">📋 Description</p>
+                              <p className="text-sm font-medium text-gray-700">Description</p>
                               <p className="text-gray-600">{suggestion.description}</p>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-gray-700">💡 Why this workout?</p>
+                              <p className="text-sm font-medium text-gray-700">Why this workout?</p>
                               <p className="text-gray-600">{suggestion.reasoning}</p>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-gray-700">🎯 Benefit</p>
+                              <p className="text-sm font-medium text-gray-700">Benefit</p>
                               <p className="text-gray-600">{suggestion.benefit}</p>
                             </div>
                           </div>
@@ -483,13 +501,13 @@ export default function AISuggestionsPage() {
                               onClick={() => addWorkoutToPlan(suggestion.id)}
                               className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                             >
-                              ➕ Add to Plan
+                              Add to Plan
                             </button>
                             <button
                               onClick={() => dismissWorkout(suggestion.id)}
                               className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
                             >
-                              ❌ Dismiss
+                              Dismiss
                             </button>
                           </div>
                         </div>
@@ -501,14 +519,14 @@ export default function AISuggestionsPage() {
                 {/* Training Plan */}
                 {workoutSuggestions.filter(w => w.status === "added_to_plan").length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">📅 Your Training Plan</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Training Plan</h3>
                     <div className="grid gap-6">
                       {workoutSuggestions.filter(w => w.status === "added_to_plan").map((suggestion) => (
                         <div key={suggestion.id} className="bg-green-50 border-2 border-green-200 rounded-lg shadow p-6">
                           <div className="flex justify-between items-start mb-4">
                             <div>
                               <div className="flex items-center gap-3 mb-2">
-                                <span className="text-3xl">{getWorkoutTypeIcon(suggestion.workout_type)}</span>
+                                <span className="text-sm font-medium text-gray-500 uppercase">{getWorkoutTypeLabel(suggestion.workout_type)}</span>
                                 <div>
                                   <h3 className="text-xl font-semibold text-gray-900">{suggestion.name}</h3>
                                   <p className="text-gray-600 text-sm">
@@ -518,17 +536,17 @@ export default function AISuggestionsPage() {
                               </div>
                             </div>
                             <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-600 text-white">
-                              ✅ In Plan
+                              In Plan
                             </span>
                           </div>
 
                           <div className="space-y-3 mb-6">
                             <div>
-                              <p className="text-sm font-medium text-gray-700">📋 Description</p>
+                              <p className="text-sm font-medium text-gray-700">Description</p>
                               <p className="text-gray-600">{suggestion.description}</p>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-gray-700">🎯 Benefit</p>
+                              <p className="text-sm font-medium text-gray-700">Benefit</p>
                               <p className="text-gray-600">{suggestion.benefit}</p>
                             </div>
                           </div>
@@ -541,7 +559,7 @@ export default function AISuggestionsPage() {
                               Remove from Plan
                             </button>
                             <p className="text-sm text-gray-600 flex items-center">
-                              💡 Tip: Log this workout when you complete it!
+                              Tip: Log this workout when you complete it!
                             </p>
                           </div>
                         </div>

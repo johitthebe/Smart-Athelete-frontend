@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/config";
 
 type Notification = {
   id: number;
@@ -28,7 +29,7 @@ export default function NotificationsPage() {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/notifications/", {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/`, {
         credentials: "include",
       });
 
@@ -48,11 +49,11 @@ export default function NotificationsPage() {
       let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
 
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
       }
 
-      const response = await fetch(`/api/notifications/${notificationId}/mark_read/`, {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/${notificationId}/mark_read/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -74,11 +75,11 @@ export default function NotificationsPage() {
       let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
 
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
       }
 
-      const response = await fetch("/api/notifications/mark_all_read/", {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/mark_all_read/`, {
         method: "POST",
         credentials: "include",
         headers: {

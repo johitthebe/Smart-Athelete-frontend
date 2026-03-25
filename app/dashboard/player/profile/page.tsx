@@ -32,7 +32,7 @@ export default function ProfilePage() {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch("/api/auth/me/", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/me/`, {
         credentials: "include",
       });
       if (response.ok) {
@@ -60,11 +60,11 @@ export default function ProfilePage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
 
-      const response = await fetch("/api/auth/me/", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/me/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

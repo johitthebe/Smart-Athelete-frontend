@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Line, Bar, Radar } from "react-chartjs-2";
+import { API_BASE_URL } from "@/lib/config";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -54,8 +55,8 @@ export default function CoachReportsPage() {
     setLoading(true);
     try {
       const endpoint = activeTab === "pending" 
-        ? "/api/performance/reports/pending/"
-        : "/api/performance/reports/reviewed/";
+        ? `${API_BASE_URL}/api/performance/reports/pending/`
+        : `${API_BASE_URL}/api/performance/reports/reviewed/`;
       
       const response = await fetch(endpoint, {
         credentials: "include",
@@ -80,11 +81,11 @@ export default function CoachReportsPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
 
-      const response = await fetch(`/api/performance/reports/${selectedReport.id}/give_feedback/`, {
+      const response = await fetch(`${API_BASE_URL}/api/performance/reports/${selectedReport.id}/give_feedback/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -114,11 +115,11 @@ export default function CoachReportsPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
 
-      const response = await fetch(`/api/performance/reports/${reportId}/mark_reviewed/`, {
+      const response = await fetch(`${API_BASE_URL}/api/performance/reports/${reportId}/mark_reviewed/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -175,7 +176,7 @@ export default function CoachReportsPage() {
               : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
           }`}
         >
-          ⏳ Pending Review ({reports.filter(r => r.status === 'pending').length})
+          Pending Review ({reports.filter(r => r.status === 'pending').length})
         </button>
         <button
           onClick={() => { setActiveTab("reviewed"); setSelectedReport(null); }}
@@ -185,7 +186,7 @@ export default function CoachReportsPage() {
               : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
           }`}
         >
-          ✅ Reviewed
+          Reviewed
         </button>
       </div>
 
@@ -196,7 +197,7 @@ export default function CoachReportsPage() {
             onClick={() => setSelectedReport(null)}
             className="text-blue-600 hover:text-blue-700 font-medium"
           >
-            ← Back to reports
+            Back to reports
           </button>
 
           {/* Report Header */}

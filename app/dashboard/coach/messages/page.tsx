@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/config";
 
 type Message = {
   id: number;
@@ -51,7 +52,7 @@ export default function CoachMessagesPage() {
   const fetchMessages = async () => {
     setLoading(true);
     try {
-      const endpoint = activeTab === "inbox" ? "/api/performance/messages/inbox/" : "/api/performance/messages/sent/";
+      const endpoint = activeTab === "inbox" ? `${API_BASE_URL}/api/performance/messages/inbox/` : `${API_BASE_URL}/api/performance/messages/sent/`;
       const response = await fetch(endpoint, {
         credentials: "include",
       });
@@ -69,7 +70,7 @@ export default function CoachMessagesPage() {
 
   const fetchAthletes = async () => {
     try {
-      const response = await fetch("/api/coach/athletes/", {
+      const response = await fetch(`${API_BASE_URL}/api/coach/athletes/`, {
         credentials: "include",
       });
 
@@ -84,7 +85,7 @@ export default function CoachMessagesPage() {
 
   const fetchUnreadCount = async () => {
     try {
-      const response = await fetch("/api/performance/messages/unread_count/", {
+      const response = await fetch(`${API_BASE_URL}/api/performance/messages/unread_count/`, {
         credentials: "include",
       });
 
@@ -104,11 +105,11 @@ export default function CoachMessagesPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
 
-      const response = await fetch("/api/performance/messages/", {
+      const response = await fetch(`${API_BASE_URL}/api/performance/messages/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -137,11 +138,11 @@ export default function CoachMessagesPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
 
-      const response = await fetch(`/api/performance/messages/${messageId}/mark_read/`, {
+      const response = await fetch(`${API_BASE_URL}/api/performance/messages/${messageId}/mark_read/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -182,7 +183,7 @@ export default function CoachMessagesPage() {
               : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
           }`}
         >
-          📥 Inbox {unreadCount > 0 && <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">{unreadCount}</span>}
+          Inbox {unreadCount > 0 && <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">{unreadCount}</span>}
         </button>
         <button
           onClick={() => { setActiveTab("sent"); setSelectedMessage(null); }}
@@ -192,7 +193,7 @@ export default function CoachMessagesPage() {
               : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
           }`}
         >
-          📤 Sent
+          Sent
         </button>
         <button
           onClick={() => { setActiveTab("compose"); setSelectedMessage(null); }}
@@ -202,7 +203,7 @@ export default function CoachMessagesPage() {
               : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
           }`}
         >
-          ✏️ Compose
+          Compose
         </button>
       </div>
 
@@ -281,7 +282,7 @@ export default function CoachMessagesPage() {
             onClick={() => setSelectedMessage(null)}
             className="mb-4 text-blue-600 hover:text-blue-700 text-sm font-medium"
           >
-            ← Back to {activeTab}
+            Back to {activeTab}
           </button>
           
           <div className="border-b pb-4 mb-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/lib/config";
 
 type Feedback = {
   id: number;
@@ -38,7 +39,7 @@ export default function FeedbackPage() {
   const fetchFeedback = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/performance/feedback/", {
+      const response = await fetch(`${API_BASE_URL}/api/performance/feedback/`, {
         credentials: "include",
       });
 
@@ -58,11 +59,11 @@ export default function FeedbackPage() {
       let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
 
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
       }
 
-      const response = await fetch(`/api/performance/feedback/${feedbackId}/mark_read/`, {
+      const response = await fetch(`${API_BASE_URL}/api/performance/feedback/${feedbackId}/mark_read/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -84,11 +85,11 @@ export default function FeedbackPage() {
       let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
 
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
       }
 
-      const response = await fetch(`/api/performance/feedback/${feedbackId}/acknowledge/`, {
+      const response = await fetch(`${API_BASE_URL}/api/performance/feedback/${feedbackId}/acknowledge/`, {
         method: "POST",
         credentials: "include",
         headers: {

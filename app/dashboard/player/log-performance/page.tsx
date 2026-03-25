@@ -9,6 +9,11 @@ type Goal = {
   id: number;
   name: string;
   status: string;
+  activity_type: {
+    id: number;
+    name: string;
+    icon: string;
+  } | null;
 };
 
 type ActivityType = {
@@ -102,6 +107,24 @@ export default function LogPerformancePage() {
     const activityType = activityTypes.find((at) => at.id === parseInt(activityTypeId));
     setSelectedActivityType(activityType || null);
     setFormData({ ...formData, activity_type_id: activityTypeId });
+  };
+
+  const handleGoalChange = (goalId: string) => {
+    const selectedGoal = goals.find((g) => g.id === parseInt(goalId));
+    
+    // Auto-select activity type from goal if available
+    if (selectedGoal && selectedGoal.activity_type) {
+      const activityTypeId = selectedGoal.activity_type.id.toString();
+      const activityType = activityTypes.find((at) => at.id === selectedGoal.activity_type!.id);
+      setSelectedActivityType(activityType || null);
+      setFormData({ 
+        ...formData, 
+        goal_id: goalId,
+        activity_type_id: activityTypeId
+      });
+    } else {
+      setFormData({ ...formData, goal_id: goalId });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -236,7 +259,7 @@ export default function LogPerformancePage() {
               <label className="block text-xs font-medium text-gray-700 mb-1">Goal *</label>
               <select
                 value={formData.goal_id}
-                onChange={(e) => setFormData({ ...formData, goal_id: e.target.value })}
+                onChange={(e) => handleGoalChange(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
                 required
               >
@@ -251,7 +274,7 @@ export default function LogPerformancePage() {
 
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
-                Activity Type
+                Activity Type {formData.activity_type_id && "(Auto-selected from goal)"}
               </label>
               <select
                 value={formData.activity_type_id}

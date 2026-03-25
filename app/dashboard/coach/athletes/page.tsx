@@ -35,7 +35,7 @@ export default function AthletesListPage() {
 
   const fetchAthletes = async () => {
     try {
-      const response = await fetch("/api/coach/athletes/", {
+      const response = await fetch(`${API_BASE_URL}/api/coach/athletes/`, {
         credentials: "include",
       });
 
@@ -121,7 +121,7 @@ export default function AthletesListPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filteredAthletes.map((athlete) => {
+                {filteredAthletes.map((athlete, index) => {
                   const displayName =
                     athlete.first_name || athlete.last_name
                       ? `${athlete.first_name} ${athlete.last_name}`.trim()
@@ -130,7 +130,7 @@ export default function AthletesListPage() {
                   const initial = displayName ? displayName[0]?.toUpperCase() : '?';
 
                   return (
-                    <tr key={athlete.id} className="hover:bg-gray-50">
+                    <tr key={`athlete-${athlete.id}-${index}`} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">

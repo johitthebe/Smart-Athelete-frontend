@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/config";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -89,26 +90,33 @@ export default function AthleteDetailPage() {
     setLoading(true);
     try {
       // Fetch athlete info (from assignment)
-      const assignmentRes = await fetch("/api/coach/athletes/", {
+      const assignmentRes = await fetch(`${API_BASE_URL}/api/auth/coaches/my-athletes/`, {
         credentials: "include",
       });
       if (assignmentRes.ok) {
-        const assignments = await assignmentRes.json();
+        const data = await assignmentRes.json();
+        // Handle both array and object with athletes property
+        const assignments = Array.isArray(data) ? data : (data.athletes || []);
         const assignment = assignments.find((a: any) => a.athlete === parseInt(athleteId));
         if (assignment) {
           const [firstName, ...lastNameParts] = (assignment.athlete_name || '').split(' ');
           setAthlete({
             id: assignment.athlete,
-            username: assignment.athlete_username,
+            username: assignment.athlete_username || assignment.athlete_name || 'Unknown',
             first_name: firstName || '',
             last_name: lastNameParts.join(' ') || '',
-            email: assignment.athlete_email,
+            email: assignment.athlete_email || '',
           });
+        } else {
+          console.error("Athlete not found in assignments list. Looking for ID:", athleteId);
+          console.error("Available assignments:", assignments);
         }
+      } else {
+        console.error("Failed to fetch assignments:", assignmentRes.status);
       }
 
       // Fetch athlete's goals
-      const goalsRes = await fetch(`/api/performance/goals/?athlete=${athleteId}`, {
+      const goalsRes = await fetch(`${API_BASE_URL}/api/performance/goals/?athlete=${athleteId}`, {
         credentials: "include",
       });
       if (goalsRes.ok) {
@@ -117,7 +125,7 @@ export default function AthleteDetailPage() {
       }
 
       // Fetch athlete's performance logs
-      const logsRes = await fetch(`/api/performance/performance-logs/?athlete=${athleteId}&limit=20`, {
+      const logsRes = await fetch(`${API_BASE_URL}/api/performance/performance-logs/?athlete=${athleteId}&limit=20`, {
         credentials: "include",
       });
       if (logsRes.ok) {
@@ -126,7 +134,7 @@ export default function AthleteDetailPage() {
       }
 
       // Fetch feedback given to this athlete
-      const feedbackRes = await fetch(`/api/performance/feedback/?athlete=${athleteId}`, {
+      const feedbackRes = await fetch(`${API_BASE_URL}/api/performance/feedback/?athlete=${athleteId}`, {
         credentials: "include",
       });
       if (feedbackRes.ok) {
@@ -148,11 +156,11 @@ export default function AthleteDetailPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
 
-      const response = await fetch("/api/performance/feedback/", {
+      const response = await fetch(`${API_BASE_URL}/api/performance/feedback/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -223,7 +231,21 @@ export default function AthleteDetailPage() {
     return (
       <div className="mx-auto w-full max-w-7xl px-8 py-6">
         <div className="text-center py-12">
-          <p className="text-gray-500">Athlete not found</p>
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Athlete Not Found</h2>
+          <p className="text-gray-500 mb-6">
+            This athlete is not assigned to you or the ID is invalid.
+          </p>
+          <button
+            onClick={() => router.push('/dashboard/coach')}
+            className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+          >
+            Back to Dashboard
+          </button>
         </div>
       </div>
     );

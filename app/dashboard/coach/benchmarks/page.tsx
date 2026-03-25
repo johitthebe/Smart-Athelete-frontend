@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/lib/config";
 
 type Benchmark = {
   id: number;
@@ -37,7 +38,7 @@ export default function CoachBenchmarksPage() {
 
   const fetchBenchmarks = async () => {
     try {
-      const response = await fetch("/api/performance/benchmarks/", {
+      const response = await fetch(`${API_BASE_URL}/api/performance/benchmarks/`, {
         credentials: "include",
       });
 
@@ -62,11 +63,11 @@ export default function CoachBenchmarksPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
 
-      const response = await fetch("/api/performance/benchmarks/", {
+      const response = await fetch(`${API_BASE_URL}/api/performance/benchmarks/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -109,11 +110,11 @@ export default function CoachBenchmarksPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
 
-      const response = await fetch(`/api/performance/benchmarks/${id}/`, {
+      const response = await fetch(`${API_BASE_URL}/api/performance/benchmarks/${id}/`, {
         method: "DELETE",
         credentials: "include",
         headers: {

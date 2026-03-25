@@ -44,11 +44,19 @@ type PerformanceLog = {
   } | null;
 };
 
+type Stats = {
+  total_logs: number;
+  total_distance: number;
+  completed_goals: number;
+  this_week_logs: number;
+};
+
 export default function PlayerDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
   const [recentLogs, setRecentLogs] = useState<PerformanceLog[]>([]);
+  const [stats, setStats] = useState<Stats>({ total_logs: 0, total_distance: 0, completed_goals: 0, this_week_logs: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
@@ -82,8 +90,39 @@ export default function PlayerDashboard() {
     await Promise.all([
       fetchActiveGoals(),
       fetchRecentLogs(),
+      fetchStats(),
     ]);
     setStatsLoading(false);
+  };
+
+  const fetchStats = async () => {
+    try {
+      // Fetch all logs for total count and distance
+      const [logsRes, goalsRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/performance/performance-logs/`, { credentials: "include" }),
+        fetch(`${API_BASE_URL}/api/performance/goals/`, { credentials: "include" }),
+      ]);
+
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      if (logsRes.ok) {
+        const logsData = await logsRes.json();
+        const allLogs: PerformanceLog[] = logsData.results || logsData;
+        const totalDistance = allLogs.reduce((sum, l) => sum + (l.distance || 0), 0);
+        const thisWeek = allLogs.filter(l => new Date(l.date) >= weekAgo).length;
+        setStats(prev => ({ ...prev, total_logs: allLogs.length, total_distance: Math.round(totalDistance * 10) / 10, this_week_logs: thisWeek }));
+      }
+
+      if (goalsRes.ok) {
+        const goalsData = await goalsRes.json();
+        const allGoals = goalsData.results || goalsData;
+        const completed = allGoals.filter((g: Goal) => g.status === 'completed').length;
+        setStats(prev => ({ ...prev, completed_goals: completed }));
+      }
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
   };
 
   const fetchActiveGoals = async () => {
@@ -135,7 +174,7 @@ export default function PlayerDashboard() {
     <div className="mx-auto w-full max-w-7xl px-8 py-6 space-y-6">
       {/* Welcome Header */}
       <div className="pb-4">
-        <h1 className="text-2xl font-bold text-gray-900">Welcome back, {displayName}! 👋</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Welcome back, {displayName}!</h1>
         <p className="text-sm text-gray-500 mt-1">Here's your performance overview for today.</p>
       </div>
 
@@ -164,13 +203,8 @@ export default function PlayerDashboard() {
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">This Week</p>
-              <p className="text-2xl font-bold text-gray-900">{statsLoading ? '...' : recentLogs.filter(log => {
-                const logDate = new Date(log.date);
-                const weekAgo = new Date();
-                weekAgo.setDate(weekAgo.getDate() - 7);
-                return logDate >= weekAgo;
-              }).length}</p>
-              <p className="text-xs text-green-600">performance logs</p>
+              <p className="text-2xl font-bold text-gray-900">{statsLoading ? '...' : stats.this_week_logs}</p>
+              <p className="text-xs text-green-600">sessions logged</p>
             </div>
           </div>
         </div>
@@ -183,9 +217,9 @@ export default function PlayerDashboard() {
               </svg>
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">Total Logs</p>
-              <p className="text-2xl font-bold text-gray-900">{statsLoading ? '...' : recentLogs.length}</p>
-              <p className="text-xs text-gray-500">recent</p>
+              <p className="text-xs text-gray-500 font-medium">Total Distance</p>
+              <p className="text-2xl font-bold text-gray-900">{statsLoading ? '...' : stats.total_distance}</p>
+              <p className="text-xs text-gray-500">km all time</p>
             </div>
           </div>
         </div>
@@ -198,9 +232,9 @@ export default function PlayerDashboard() {
               </svg>
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">Completed</p>
-              <p className="text-2xl font-bold text-gray-900">{statsLoading ? '...' : activeGoals.filter(g => g.status === 'completed').length}</p>
-              <p className="text-xs text-gray-500">goals achieved</p>
+              <p className="text-xs text-gray-500 font-medium">Goals Completed</p>
+              <p className="text-2xl font-bold text-gray-900">{statsLoading ? '...' : stats.completed_goals}</p>
+              <p className="text-xs text-gray-500">all time</p>
             </div>
           </div>
         </div>
@@ -250,8 +284,10 @@ export default function PlayerDashboard() {
               {recentLogs.slice(0, 5).map((log) => (
                 <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
-                      {log.activity_type?.icon || '🏃'}
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">{log.activity_type?.name || log.event || 'Activity'}</p>

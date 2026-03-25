@@ -1,10 +1,9 @@
 // API configuration and utilities
-// IMPORTANT: Use localhost (not 127.0.0.1) to avoid cookie issues
-const API_BASE_URL = 'http://localhost:8000/api';
+import { API_BASE_URL } from './config';
 
 // Helper function to make authenticated requests
 async function apiRequest(endpoint: string, options: RequestInit = {}) {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${API_BASE_URL}/api${endpoint}`;
   
   const defaultOptions: RequestInit = {
     credentials: 'include', // Include cookies for session auth

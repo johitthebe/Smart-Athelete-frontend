@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Line, Bar, Radar } from "react-chartjs-2";
+import { API_BASE_URL } from "@/lib/config";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -62,7 +63,7 @@ export default function PerformanceReportsPage() {
     setLoading(true);
     try {
       console.log("Fetching analytics for range:", timeRange);
-      const response = await fetch(`/api/performance/analytics/?range=${timeRange}`, {
+      const response = await fetch(`${API_BASE_URL}/api/performance/analytics/?range=${timeRange}`, {
         credentials: "include",
       });
       
@@ -86,7 +87,7 @@ export default function PerformanceReportsPage() {
 
   const fetchCoaches = async () => {
     try {
-      const response = await fetch("/api/performance/reports/my_coaches/", {
+      const response = await fetch(`${API_BASE_URL}/api/performance/reports/my_coaches/`, {
         credentials: "include",
       });
       
@@ -106,11 +107,11 @@ export default function PerformanceReportsPage() {
       let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       
       if (!csrfToken) {
-        await fetch("/api/csrf/", { credentials: "include" });
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
         csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
       }
 
-      const response = await fetch("/api/performance/reports/", {
+      const response = await fetch(`${API_BASE_URL}/api/performance/reports/`, {
         method: "POST",
         credentials: "include",
         headers: {
