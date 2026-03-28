@@ -70,13 +70,22 @@ export default function CoachMessagesPage() {
 
   const fetchAthletes = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/coach/athletes/`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/coaches/my-athletes/`, {
         credentials: "include",
       });
 
       if (response.ok) {
         const data = await response.json();
-        setAthletes(data);
+        // Handle both array and object with athletes property
+        const athletesList = Array.isArray(data) ? data : (data.athletes || []);
+        // Map to expected format with athlete user ID
+        const mappedAthletes = athletesList.map((a: any) => ({
+          id: a.athlete, // Use athlete user ID, not assignment ID
+          username: a.athlete_username || a.athlete_name,
+          athlete_name: a.athlete_name,
+          athlete_email: a.athlete_email
+        }));
+        setAthletes(mappedAthletes);
       }
     } catch (error) {
       console.error("Error fetching athletes:", error);
