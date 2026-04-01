@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "../styles/landing-colors.css";
+@import "../styles/landing-base.css";
 
 :root {
   --background: #ffffff;
