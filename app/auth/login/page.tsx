@@ -22,16 +22,12 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    try {
-      console.log("🔐 Attempting login...");
-      console.log("Current URL:", window.location.href);
-      console.log("Cookies before login:", document.cookie);
-      
-      // Skip CSRF fetch for now and try direct login
-      const csrfToken = getCookie("csrftoken");
+    let res: Response;
 
-      // Send login request via Next.js proxy (same domain)
-      const res = await fetch("/api/auth/login/", {
+    // ── 1. Fire the request ───────────────────────────────────────
+    try {
+      const csrfToken = getCookie("csrftoken");
+      res = await fetch("/api/auth/login/", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -40,43 +36,63 @@ export default function Login() {
         },
         body: JSON.stringify({ identifier, password }),
       });
+    } catch (networkErr) {
+      // fetch() itself threw — backend is unreachable
+      console.error("Network error — backend not reachable:", networkErr);
+      setError(
+        "Cannot reach the server. Make sure the backend is running on port 8000."
+      );
+      return;
+    }
 
-      console.log("Login response status:", res.status);
-      console.log("Cookies after login:", document.cookie);
+    console.log("Login response status:", res.status);
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
+    // ── 2. Handle non-OK responses ────────────────────────────────
+    if (!res.ok) {
+      // Try to parse an error message; fall back gracefully
+      let message = "Invalid credentials. Please try again.";
+      try {
+        const data = await res.json();
         console.error("Login failed:", data);
-        setError(data?.error || "Invalid credentials");
-        return;
+        if (data?.error) message = data.error;
+        else if (data?.detail) message = data.detail;
+        else if (data?.non_field_errors) message = data.non_field_errors[0];
+        else if (typeof data === "string") message = data;
+      } catch {
+        // Body was empty or not JSON — use the status code for context
+        if (res.status === 401 || res.status === 403) {
+          message = "Invalid username/email or password.";
+        } else if (res.status >= 500) {
+          message = `Server error (${res.status}). Check that Django is running.`;
+        }
       }
+      setError(message);
+      return;
+    }
 
-      const data = await res.json();
-      console.log("Login successful:", data);
-      console.log("Session cookie present?", document.cookie.includes("sessionid"));
-      
-      const role = data.user?.role;
+    // ── 3. Success ────────────────────────────────────────────────
+    let data: any = {};
+    try {
+      data = await res.json();
+    } catch {
+      // Shouldn't happen on 2xx, but guard anyway
+    }
+    console.log("Login successful:", data);
 
-      // Redirect based on role
-      if (role === "admin") {
-        router.push("/admin");
-      } else if (role === "coach" || role === "coach_pending") {
-        router.push("/dashboard/coach");
-      } else if (role === "athlete") {
-        router.push("/dashboard/player");
-      } else {
-        router.push("/auth/choose-role");
-      }
-    } catch (err: any) {
-      console.error("Login error:", err);
-      setError("Login failed. Please try again.");
+    const role = data.user?.role;
+    if (role === "admin") {
+      router.push("/admin");
+    } else if (role === "coach" || role === "coach_pending") {
+      router.push("/dashboard/coach");
+    } else if (role === "athlete") {
+      router.push("/dashboard/player");
+    } else {
+      router.push("/auth/choose-role");
     }
   };
 
   const handleGoogleLogin = () => {
-    // Start Google login; Django/allauth will redirect back to NEXT_URL
-    window.location.href =
-      `${API_BASE_URL}/accounts/google/login/?next=/post-login`;
+    window.location.href = 'http://localhost:8000/accounts/google/login/?next=/post-login';
   };
 
   return (

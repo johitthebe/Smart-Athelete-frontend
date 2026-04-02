@@ -28,7 +28,7 @@ export default function MyRequestsPage() {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/coach-requests/my-requests/`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/coach-requests/my_requests/`, {
         credentials: "include",
       });
 

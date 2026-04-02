@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function LandingPage() {
+export default function HomePage() {
   const [email, setEmail] = useState("");
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
@@ -20,9 +20,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <span className="text-white text-2xl font-bold">Smart</span>
-              <span className="text-[#2E6BE6] text-2xl font-bold">Athlete</span>
+            <div className="flex items-center">
+              <Image src="/logo.svg" alt="Smart Athlete Logo" width={60} height={60} className="w-15 h-15" />
             </div>
 
             {/* Nav Links */}
@@ -31,23 +30,19 @@ export default function LandingPage() {
                 Features
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2E6BE6] group-hover:w-full transition-all duration-300"></span>
               </a>
-              <a href="#approach" className="text-white/65 hover:text-white transition-colors relative group">
-                Approach
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2E6BE6] group-hover:w-full transition-all duration-300"></span>
-              </a>
               <a href="#coaches" className="text-white/65 hover:text-white transition-colors relative group">
                 Coaches
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2E6BE6] group-hover:w-full transition-all duration-300"></span>
               </a>
-              <a href="#blog" className="text-white/65 hover:text-white transition-colors relative group">
-                Blog
+              <Link href="/auth/login" className="text-white/65 hover:text-white transition-colors relative group">
+                Sign In
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2E6BE6] group-hover:w-full transition-all duration-300"></span>
-              </a>
+              </Link>
             </div>
 
             {/* CTA Button */}
             <Link 
-              href="/auth/register"
+              href="/auth/signup"
               className="bg-[#2E6BE6] text-white px-6 py-2.5 rounded-[3px] font-bold text-sm uppercase tracking-wider hover:bg-[#1a58d4] transition-colors"
             >
               Start Free
@@ -83,14 +78,17 @@ export default function LandingPage() {
             {/* CTA Buttons */}
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link
-                href="/auth/register"
+                href="/auth/signup"
                 className="bg-[#2E6BE6] text-white px-8 py-4 rounded-[3px] font-bold text-sm uppercase tracking-wider hover:bg-[#1a58d4] transition-all"
               >
                 Start Free Trial
               </Link>
-              <button className="border-2 border-[#2E6BE6] text-[#2E6BE6] px-8 py-4 rounded-[3px] font-bold text-sm uppercase tracking-wider hover:bg-[#2E6BE6]/10 transition-all">
-                Watch Demo
-              </button>
+              <Link
+                href="/auth/login"
+                className="border-2 border-[#2E6BE6] text-[#2E6BE6] px-8 py-4 rounded-[3px] font-bold text-sm uppercase tracking-wider hover:bg-[#2E6BE6]/10 transition-all"
+              >
+                Sign In
+              </Link>
             </div>
           </div>
 
@@ -426,9 +424,8 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
             {/* Brand Column */}
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-white text-2xl font-bold">Smart</span>
-                <span className="text-[#2E6BE6] text-2xl font-bold">Athlete</span>
+              <div className="flex items-center mb-4">
+                <Image src="/logo.svg" alt="Smart Athlete Logo" width={48} height={48} className="w-12 h-12" />
               </div>
               <p className="text-[#8898B4] text-sm max-w-[220px] leading-relaxed mb-6">
                 AI-powered athletic training platform helping you achieve your goals faster
