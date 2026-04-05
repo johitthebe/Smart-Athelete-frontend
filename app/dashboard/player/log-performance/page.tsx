@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
 import { ensureCsrfToken, getFetchHeaders } from "@/lib/csrf";
+import { useToast } from "@/app/component/ToastContainer";
 
 type Goal = {
   id: number;
@@ -26,13 +27,13 @@ type ActivityType = {
 
 export default function LogPerformancePage() {
   const router = useRouter();
+  const toast = useToast();
   const [hasActiveGoals, setHasActiveGoals] = useState(false);
   const [checkingGoals, setCheckingGoals] = useState(true);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [activityTypes, setActivityTypes] = useState<ActivityType[]>([]);
   const [selectedActivityType, setSelectedActivityType] = useState<ActivityType | null>(null);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -130,7 +131,7 @@ export default function LogPerformancePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
+
     setSubmitting(true);
 
     try {
@@ -159,7 +160,7 @@ export default function LogPerformancePage() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess("Performance logged successfully!");
+        toast.success("Performance logged successfully! 🎉");
         setFormData({
           goal_id: formData.goal_id,
           activity_type_id: formData.activity_type_id,
@@ -171,10 +172,10 @@ export default function LogPerformancePage() {
           notes: "",
         });
       } else {
-        setError(data.error || Object.values(data).flat().join(", "));
+        toast.error(data.error || "Failed to log performance");
       }
     } catch (err) {
-      setError("An error occurred while logging performance");
+      toast.error("An error occurred while logging performance");
     } finally {
       setSubmitting(false);
     }
@@ -229,17 +230,6 @@ export default function LogPerformancePage() {
         <h1 className="text-2xl font-bold text-gray-900">Log Performance</h1>
         <p className="text-sm text-gray-500 mt-1">Record your training activity</p>
       </header>
-
-      {success && (
-        <div className="rounded-xl bg-green-50 border border-green-200 p-4">
-          <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-sm text-green-800">{success}</p>
-          </div>
-        </div>
-      )}
 
       {error && (
         <div className="rounded-xl bg-red-50 border border-red-200 p-4">

@@ -91,35 +91,12 @@ export default function Login() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8000/accounts/google/login/?next=/post-login';
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-md px-6">
         <h1 className="text-3xl md:text-4xl font-semibold text-center mb-8">
           Sign In to your account
         </h1>
-
-        {/* Google login button */}
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          className="w-full border border-gray-300 rounded-md py-3 flex items-center justify-center gap-2 text-sm font-medium hover:bg-gray-50"
-        >
-          <span className="h-5 w-5 rounded-full bg-white border border-gray-300 flex items-center justify-center">
-            <span className="text-xs font-bold text-[#4285F4]">G</span>
-          </span>
-          Continue with Google
-        </button>
-
-        {/* Divider */}
-        <div className="flex items-center my-6">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="px-3 text-xs text-gray-400">OR</span>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div>
 
         {error && (
           <p className="text-red-500 text-sm text-center mb-4">{error}</p>

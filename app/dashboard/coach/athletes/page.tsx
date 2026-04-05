@@ -75,28 +75,28 @@ export default function AthletesListPage() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-6 space-y-5">
+    <div className="mx-auto w-full max-w-6xl px-8 py-6 space-y-6">
       <header>
-        <h1 className="text-xl font-semibold text-gray-900">My Athletes</h1>
-        <p className="text-sm text-gray-500">View and manage your athletes</p>
+        <h1 className="text-2xl font-bold text-gray-900">My Athletes</h1>
+        <p className="text-sm text-gray-500 mt-1">View and manage your athletes</p>
       </header>
 
       {/* Search */}
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search athletes by name, username, or email..."
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
+          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       </div>
 
       {/* Athletes List */}
-      <div className="rounded-2xl bg-white p-5 shadow-sm">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-900">All Athletes</h2>
-          <p className="text-xs text-gray-500">
+          <h2 className="text-base font-semibold text-gray-900">All Athletes</h2>
+          <p className="text-sm text-gray-500 mt-1">
             {filteredAthletes.length} athlete{filteredAthletes.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -111,13 +111,13 @@ export default function AthletesListPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead className="border-b bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Athlete</th>
-                  <th className="px-4 py-3 font-medium">Email</th>
-                  <th className="px-4 py-3 font-medium">Joined</th>
-                  <th className="px-4 py-3 font-medium text-right">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Athlete</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -131,9 +131,9 @@ export default function AthletesListPage() {
 
                   return (
                     <tr key={`athlete-${athlete.id}-${index}`} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                             {initial}
                           </div>
                           <div>
@@ -142,21 +142,21 @@ export default function AthletesListPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-gray-600">{athlete.email}</td>
-                      <td className="px-4 py-3 text-gray-600">
+                      <td className="px-6 py-4 text-gray-600">{athlete.email}</td>
+                      <td className="px-6 py-4 text-gray-600">
                         {new Date(athlete.date_joined).toLocaleDateString()}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => router.push(`/dashboard/coach/athletes/${athlete.id}`)}
-                            className="rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                            className="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 text-sm font-medium"
                           >
                             View Profile
                           </button>
                           <button
                             onClick={() => router.push(`/dashboard/coach/messages?compose=true&athlete=${athlete.id}`)}
-                            className="rounded-full border border-blue-300 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50"
+                            className="px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 text-sm font-medium"
                           >
                             Message
                           </button>

@@ -178,276 +178,232 @@ export default function PlayerDashboard() {
   const cards = statCards(stats, activeGoals, statsLoading);
 
   return (
-    <div
-      className="mx-auto w-full max-w-7xl px-6 py-6 space-y-6"
-      style={{ background: "var(--color-ice)", minHeight: "100vh" }}
-    >
-      {/* ── Welcome Header ───────────────────────────────────── */}
-      <div
-        className="rounded-xl px-7 py-5 flex items-center justify-between"
-        style={{ background: "var(--color-white)", border: "1px solid var(--color-border)", boxShadow: "var(--shadow-card)" }}
-      >
-        <div>
-          <h1 className="text-xl font-bold" style={{ color: "var(--color-ink)" }}>
-            Welcome back, {displayName}! 👋
-          </h1>
-          <p className="text-sm mt-0.5" style={{ color: "var(--color-slate)" }}>
-            Here's your performance overview for today.
-          </p>
-        </div>
-        <button
-          onClick={() => router.push("/dashboard/player/log-performance")}
-          className="btn btn-secondary btn-sm hidden sm:flex"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Log Performance
-        </button>
-      </div>
-
-      {/* ── Stats Cards ───────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {cards.map((c) => (
-          <div key={c.label} className="card-stat">
-            <div className="flex items-center gap-3 mb-3">
-              <div className={`stat-icon ${c.iconClass}`}>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d={c.icon} />
-                </svg>
-              </div>
-              <p className="text-xs font-medium" style={{ color: "var(--color-slate)" }}>{c.label}</p>
-            </div>
-            <p className="text-2xl font-bold" style={{ color: "var(--color-ink)" }}>{c.value}</p>
-            <p className="text-xs mt-0.5" style={{ color: "var(--color-slate-light)" }}>{c.sub}</p>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Welcome Header */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-7 py-5 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Welcome back, {displayName}! 👋
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">
+              Here's your performance overview for today.
+            </p>
           </div>
-        ))}
-      </div>
-
-      {/* ── Main Grid ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Recent Performance Logs */}
-        <div
-          className="lg:col-span-2"
-          style={{
-            background: "var(--color-white)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "var(--shadow-card)",
-          }}
-        >
-          {/* Header */}
-          <div
-            className="px-6 py-4 flex items-center justify-between"
-            style={{ borderBottom: "1px solid var(--color-border)" }}
+          <button
+            onClick={() => router.push("/dashboard/player/log-performance")}
+            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors"
           >
-            <h2 className="text-sm font-semibold" style={{ color: "var(--color-ink)" }}>
-              Recent Performance Logs
-            </h2>
-            <button
-              onClick={() => router.push("/dashboard/player/log-performance")}
-              className="btn btn-secondary btn-sm"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Log Performance
-            </button>
-          </div>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Log Performance
+          </button>
+        </div>
 
-          {/* Body */}
-          {statsLoading ? (
-            <div className="p-12 flex flex-col items-center gap-3">
-              <div className="spinner spinner-lg" />
-              <p className="text-sm" style={{ color: "var(--color-slate)" }}>Loading logs…</p>
-            </div>
-          ) : recentLogs.length === 0 ? (
-            <div className="p-12 flex flex-col items-center text-center">
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
-                style={{ background: "var(--color-ice)" }}
-              >
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "var(--color-slate-light)" }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {cards.map((c) => (
+            <div key={c.label} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  c.iconClass === 'stat-icon-navy' ? 'bg-blue-50' :
+                  c.iconClass === 'stat-icon-teal' ? 'bg-teal-50' :
+                  c.iconClass === 'stat-icon-electric' ? 'bg-indigo-50' :
+                  'bg-green-50'
+                }`}>
+                  <svg className={`w-5 h-5 ${
+                    c.iconClass === 'stat-icon-navy' ? 'text-blue-600' :
+                    c.iconClass === 'stat-icon-teal' ? 'text-teal-600' :
+                    c.iconClass === 'stat-icon-electric' ? 'text-indigo-600' :
+                    'text-green-600'
+                  }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d={c.icon} />
+                  </svg>
+                </div>
+                <p className="text-xs font-medium text-gray-600">{c.label}</p>
               </div>
-              <p className="text-sm font-semibold mb-1" style={{ color: "var(--color-ink)" }}>No performance logs yet</p>
-              <p className="text-sm mb-4" style={{ color: "var(--color-slate)" }}>Start tracking by logging your first workout.</p>
+              <p className="text-2xl font-bold text-gray-900">{c.value}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{c.sub}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Recent Performance Logs */}
+          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100">
+            {/* Header */}
+            <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
+              <h2 className="text-base font-semibold text-gray-900">
+                Recent Performance Logs
+              </h2>
               <button
                 onClick={() => router.push("/dashboard/player/log-performance")}
-                className="btn btn-secondary btn-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 Log Performance
               </button>
             </div>
-          ) : (
-            <div className="p-4 space-y-2">
-              {recentLogs.slice(0, 5).map((log) => (
-                <div
-                  key={log.id}
-                  className="flex items-center justify-between p-3 rounded-lg transition-all duration-150 cursor-default"
-                  style={{ background: "var(--color-ice)" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.background = "var(--color-navy-light)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.background = "var(--color-ice)";
-                  }}
+
+            {/* Body */}
+            {statsLoading ? (
+              <div className="p-12 flex flex-col items-center gap-3">
+                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm text-gray-600">Loading logs…</p>
+              </div>
+            ) : recentLogs.length === 0 ? (
+              <div className="p-12 flex flex-col items-center text-center">
+                <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <p className="text-sm font-semibold text-gray-900 mb-1">No performance logs yet</p>
+                <p className="text-sm text-gray-600 mb-4">Start tracking by logging your first workout.</p>
+                <button
+                  onClick={() => router.push("/dashboard/player/log-performance")}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ background: "var(--color-electric-light)" }}
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "var(--color-electric-dark)" }}>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold" style={{ color: "var(--color-ink)" }}>
-                        {log.activity_type?.name || log.event || "Activity"}
-                      </p>
-                      <p className="text-xs" style={{ color: "var(--color-slate)" }}>{formatDate(log.date)}</p>
-                      {log.goal && (
-                        <p className="text-xs mt-0.5" style={{ color: "var(--color-electric)" }}>
-                          Goal: {log.goal.name}
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Log Performance
+                </button>
+              </div>
+            ) : (
+              <div className="p-4 space-y-2">
+                {recentLogs.slice(0, 5).map((log) => (
+                  <div
+                    key={log.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-all cursor-default"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {log.activity_type?.name || log.event || "Activity"}
                         </p>
+                        <p className="text-xs text-gray-600">{formatDate(log.date)}</p>
+                        {log.goal && (
+                          <p className="text-xs text-blue-600 mt-0.5">
+                            Goal: {log.goal.name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      {log.distance && (
+                        <p className="text-sm font-semibold text-gray-900">{log.distance} km</p>
+                      )}
+                      {log.duration && (
+                        <p className="text-xs text-gray-600">{formatDuration(log.duration)}</p>
+                      )}
+                      {log.calories && (
+                        <p className="text-xs font-medium text-amber-600">{log.calories} cal</p>
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    {log.distance && (
-                      <p className="text-sm font-semibold" style={{ color: "var(--color-ink)" }}>{log.distance} km</p>
-                    )}
-                    {log.duration && (
-                      <p className="text-xs" style={{ color: "var(--color-slate)" }}>{formatDuration(log.duration)}</p>
-                    )}
-                    {log.calories && (
-                      <p className="text-xs font-medium" style={{ color: "var(--color-warning-dark)" }}>{log.calories} cal</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Active Goals */}
-        <div
-          style={{
-            background: "var(--color-white)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "var(--shadow-card)",
-          }}
-        >
-          {/* Header */}
-          <div
-            className="px-6 py-4 flex items-center justify-between"
-            style={{ borderBottom: "1px solid var(--color-border)" }}
-          >
-            <h2 className="text-sm font-semibold" style={{ color: "var(--color-ink)" }}>Active Goals</h2>
-            <button
-              onClick={() => router.push("/dashboard/player/goals")}
-              className="text-xs font-semibold transition-colors"
-              style={{ color: "var(--color-electric)" }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--color-electric-dark)")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--color-electric)")}
-            >
-              View all →
-            </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Body */}
-          {statsLoading ? (
-            <div className="p-12 flex flex-col items-center gap-3">
-              <div className="spinner spinner-lg" />
-              <p className="text-sm" style={{ color: "var(--color-slate)" }}>Loading goals…</p>
-            </div>
-          ) : activeGoals.length === 0 ? (
-            <div className="p-10 flex flex-col items-center text-center">
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
-                style={{ background: "var(--color-ice)" }}
-              >
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "var(--color-slate-light)" }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <p className="text-sm font-semibold mb-1" style={{ color: "var(--color-ink)" }}>No active goals</p>
-              <p className="text-xs mb-4" style={{ color: "var(--color-slate)" }}>Create your first goal to get started.</p>
+          {/* Active Goals */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+            {/* Header */}
+            <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
+              <h2 className="text-base font-semibold text-gray-900">Active Goals</h2>
               <button
                 onClick={() => router.push("/dashboard/player/goals")}
-                className="btn btn-primary btn-sm"
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Create goal
+                View all →
               </button>
             </div>
-          ) : (
-            <div className="p-4 space-y-3">
-              {activeGoals.map((goal) => {
-                const pct = Math.min(goal.progress_percentage, 100);
-                const fillClass =
-                  pct < 33 ? "progress-fill-error" : pct < 67 ? "progress-fill-warning" : "progress-fill-success";
 
-                return (
-                  <div
-                    key={goal.id}
-                    className="p-4 rounded-lg"
-                    style={{
-                      background: "var(--color-ice)",
-                      border: "1px solid var(--color-border)",
-                    }}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-sm font-semibold leading-tight" style={{ color: "var(--color-ink)" }}>
-                        {goal.name}
-                      </h3>
-                      <span
-                        className="badge badge-navy ml-2 flex-shrink-0"
-                        style={{ fontSize: "10px" }}
-                      >
-                        {Math.round(pct)}%
-                      </span>
-                    </div>
-                    {goal.description && (
-                      <p className="text-xs mb-3 leading-relaxed" style={{ color: "var(--color-slate)" }}>
-                        {goal.description}
-                      </p>
-                    )}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs" style={{ color: "var(--color-slate)" }}>
-                        <span>Progress</span>
-                        <span style={{ fontWeight: 600, color: "var(--color-ink)" }}>
-                          {goal.current_value} / {goal.target_value} {goal.target_unit}
+            {/* Body */}
+            {statsLoading ? (
+              <div className="p-12 flex flex-col items-center gap-3">
+                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm text-gray-600">Loading goals…</p>
+              </div>
+            ) : activeGoals.length === 0 ? (
+              <div className="p-10 flex flex-col items-center text-center">
+                <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-sm font-semibold text-gray-900 mb-1">No active goals</p>
+                <p className="text-xs text-gray-600 mb-4">Create your first goal to get started.</p>
+                <button
+                  onClick={() => router.push("/dashboard/player/goals")}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Create goal
+                </button>
+              </div>
+            ) : (
+              <div className="p-4 space-y-3">
+                {activeGoals.map((goal) => {
+                  const pct = Math.min(goal.progress_percentage, 100);
+                  const progressColor =
+                    pct < 33 ? "bg-red-500" : pct < 67 ? "bg-amber-500" : "bg-green-500";
+
+                  return (
+                    <div
+                      key={goal.id}
+                      className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-sm font-semibold text-gray-900 leading-tight">
+                          {goal.name}
+                        </h3>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full ml-2 flex-shrink-0">
+                          {Math.round(pct)}%
                         </span>
                       </div>
-                      {/* Progress track */}
-                      <div
-                        className="progress-track"
-                        style={{ background: "var(--color-border)" }}
-                      >
-                        <div
-                          className={`progress-fill ${fillClass}`}
-                          style={{ width: `${pct}%` }}
-                        />
+                      {goal.description && (
+                        <p className="text-xs text-gray-600 mb-3 leading-relaxed">
+                          {goal.description}
+                        </p>
+                      )}
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-xs text-gray-600">
+                          <span>Progress</span>
+                          <span className="font-semibold text-gray-900">
+                            {goal.current_value} / {goal.target_value} {goal.target_unit}
+                          </span>
+                        </div>
+                        {/* Progress bar */}
+                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full ${progressColor} transition-all duration-300`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <p className="text-[10px] text-gray-500">
+                          Deadline: {formatDate(goal.deadline)}
+                        </p>
                       </div>
-                      <p className="text-[10px]" style={{ color: "var(--color-slate-light)" }}>
-                        Deadline: {formatDate(goal.deadline)}
-                      </p>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

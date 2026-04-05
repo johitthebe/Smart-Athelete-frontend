@@ -19,22 +19,11 @@ const navItems = [
 export default function CoachSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
   const [isApproved, setIsApproved] = useState(false);
 
   useEffect(() => {
-    fetchUser();
     checkApprovalStatus();
   }, []);
-
-  const fetchUser = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/me/`, { credentials: "include" });
-      if (res.ok) setUser(await res.json());
-    } catch (err) {
-      console.error("Error fetching user:", err);
-    }
-  };
 
   const checkApprovalStatus = async () => {
     try {
@@ -113,17 +102,6 @@ export default function CoachSidebar() {
 
       {/* User footer */}
       <div className="p-3 border-t border-gray-200">
-        {user && (
-          <div className="flex items-center gap-3 p-2 rounded-lg mb-2 bg-gray-50">
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-              {user.username?.[0]?.toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate text-gray-900">{user.username}</p>
-              <p className="text-xs truncate text-gray-500">{user.email}</p>
-            </div>
-          </div>
-        )}
         <button
           onClick={handleLogout}
           className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"

@@ -322,6 +322,32 @@ export default function AISuggestionsPage() {
           <p className="text-gray-600 mt-2">Personalized goals and workouts powered by Llama 3 8B</p>
         </div>
 
+        {/* Quick Action: Log Performance */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-white font-semibold text-lg">Ready to train?</h3>
+                <p className="text-blue-100 text-sm">Log your performance to get better AI suggestions</p>
+              </div>
+            </div>
+            <button
+              onClick={() => router.push("/dashboard/player/log-performance")}
+              className="px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+            >
+              <span>Log Performance</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setActiveTab("goals")}
@@ -558,9 +584,15 @@ export default function AISuggestionsPage() {
                             >
                               Remove from Plan
                             </button>
-                            <p className="text-sm text-gray-600 flex items-center">
-                              Tip: Log this workout when you complete it!
-                            </p>
+                            <button
+                              onClick={() => router.push("/dashboard/player/log-performance")}
+                              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm flex items-center justify-center gap-2"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                              Log This Workout
+                            </button>
                           </div>
                         </div>
                       ))}

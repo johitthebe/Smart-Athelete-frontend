@@ -394,16 +394,16 @@ export default function GoalsPage() {
         ) : (
           <div className="space-y-4">
             {goals.map((goal) => (
-              <div key={goal.id} className="border rounded-xl p-4">
+              <div key={goal.id} className="bg-gray-50 border border-gray-200 rounded-xl p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-2">
                       {goal.activity_type && (
                         <span className="text-lg">{goal.activity_type.icon}</span>
                       )}
-                      <h3 className="font-medium text-gray-900">{goal.name}</h3>
+                      <h3 className="font-semibold text-gray-900">{goal.name}</h3>
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${getStatusBadge(
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadge(
                           goal.status
                         )}`}
                       >
@@ -423,18 +423,18 @@ export default function GoalsPage() {
                       <span>{goal.log_count} logs</span>
                     </div>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     {goal.status === "active" && (
                       <button
                         onClick={() => handleMarkComplete(goal.id)}
-                        className="rounded-lg border border-green-300 px-4 py-2 text-sm font-medium text-green-700 hover:bg-green-50"
+                        className="px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 text-sm font-medium"
                       >
                         Complete
                       </button>
                     )}
                     <button
                       onClick={() => handleDelete(goal.id)}
-                      className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
+                      className="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 text-sm font-medium"
                     >
                       Delete
                     </button>
@@ -444,13 +444,13 @@ export default function GoalsPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-gray-600">Progress</span>
-                    <span className="font-medium text-gray-900">
+                    <span className="font-semibold text-gray-900">
                       {goal.progress.percentage.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
                     <div
-                      className="bg-blue-600 h-2 rounded-full transition-all"
+                      className="bg-blue-600 h-2.5 rounded-full transition-all"
                       style={{ width: `${Math.min(goal.progress.percentage, 100)}%` }}
                     />
                   </div>

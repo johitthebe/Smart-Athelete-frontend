@@ -313,11 +313,11 @@ export default function CoachMessagesPage() {
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-base font-semibold text-gray-900">
               {activeTab === "inbox" ? "Inbox" : "Sent Messages"}
             </h2>
-            <p className="text-sm text-gray-500">{messages.length} message{messages.length !== 1 ? "s" : ""}</p>
+            <p className="text-sm text-gray-500 mt-1">{messages.length} message{messages.length !== 1 ? "s" : ""}</p>
           </div>
 
           {loading ? (
@@ -338,24 +338,24 @@ export default function CoachMessagesPage() {
               </p>
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y divide-gray-100">
               {messages.map((message) => (
                 <div
                   key={message.id}
                   onClick={() => viewMessage(message)}
-                  className={`p-4 hover:bg-gray-50 cursor-pointer transition ${
+                  className={`p-5 hover:bg-gray-50 cursor-pointer transition ${
                     !message.is_read && activeTab === "inbox" ? "bg-blue-50" : ""
                   }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-2">
                         {!message.is_read && activeTab === "inbox" && (
                           <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
                         )}
                         <h3 className="font-semibold text-gray-900">{message.subject}</h3>
                       </div>
-                      <p className="text-sm text-gray-600 mb-1">
+                      <p className="text-sm text-gray-600 mb-2">
                         {activeTab === "inbox" 
                           ? `From: ${message.sender_name} (@${message.sender_username})`
                           : `To: ${message.recipient_name} (@${message.recipient_username})`

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
+import ChangePasswordSection from "@/app/component/ChangePasswordSection";
 
 type User = {
   id: number;
@@ -317,6 +318,9 @@ export default function CoachProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Change Password */}
+      <ChangePasswordSection />
 
       {/* Coaching Status */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">

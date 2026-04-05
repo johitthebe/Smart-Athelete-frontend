@@ -312,11 +312,11 @@ export default function CoachReportsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-base font-semibold text-gray-900">
               {activeTab === "pending" ? "Pending Reports" : "Reviewed Reports"}
             </h2>
-            <p className="text-sm text-gray-500">{reports.length} report{reports.length !== 1 ? "s" : ""}</p>
+            <p className="text-sm text-gray-500 mt-1">{reports.length} report{reports.length !== 1 ? "s" : ""}</p>
           </div>
 
           {loading ? (
@@ -339,22 +339,22 @@ export default function CoachReportsPage() {
               </p>
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y divide-gray-100">
               {reports.map((report) => (
                 <div
                   key={report.id}
                   onClick={() => setSelectedReport(report)}
-                  className="p-4 hover:bg-gray-50 cursor-pointer transition"
+                  className="p-5 hover:bg-gray-50 cursor-pointer transition"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-gray-900">{report.title}</h3>
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                        <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
                           {report.time_range}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-1">
+                      <p className="text-sm text-gray-600 mb-2">
                         From: {report.athlete_name}
                       </p>
                       {report.athlete_notes && (
