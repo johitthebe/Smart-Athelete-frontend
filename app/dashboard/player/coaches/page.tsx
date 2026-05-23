@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
 
 type Coach = {
@@ -14,6 +15,7 @@ type Coach = {
 };
 
 export default function BrowseCoachesPage() {
+  const router = useRouter();
   const [coaches, setCoaches] = useState<Coach[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -141,15 +143,23 @@ export default function BrowseCoachesPage() {
                   )}
                 </div>
 
-                <button
-                  onClick={() => {
-                    setSelectedCoach(coach);
-                    setShowModal(true);
-                  }}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
-                >
-                  Request Coach
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => router.push(`/dashboard/player/coaches/${coach.id}`)}
+                    className="flex-1 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 font-medium text-sm"
+                  >
+                    View Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedCoach(coach);
+                      setShowModal(true);
+                    }}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+                  >
+                    Request
+                  </button>
+                </div>
               </div>
             ))}
           </div>

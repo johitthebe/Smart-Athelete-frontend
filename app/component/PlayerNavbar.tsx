@@ -39,14 +39,39 @@ export default function PlayerNavbar() {
   const handleLogout = async () => {
     if (confirm("Logout?")) {
       try {
-        await fetch(`${API_BASE_URL}/api/logout/`, {
+        // Get CSRF token
+        let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
+        
+        if (!csrfToken) {
+          await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
+          csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/auth/logout/`, {
           method: "POST",
           credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+          },
         });
+
+        console.log("Logout response:", response.status);
+        
+        // Clear localStorage regardless of response
         localStorage.clear();
-        router.push("/auth/login");
+        
+        // Clear all cookies
+        document.cookie.split(";").forEach((c) => {
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+        
+        // Force redirect to login
+        window.location.href = "/auth/login";
       } catch (err) {
         console.error("Logout failed", err);
+        localStorage.clear();
+        window.location.href = "/auth/login";
       }
     }
   };

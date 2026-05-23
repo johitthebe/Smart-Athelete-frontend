@@ -11,6 +11,7 @@ const navItems = [
   { href: "/dashboard/coach/requests",    label: "Pending Requests",icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2", requiresApproval: true },
   { href: "/dashboard/coach/capacity",    label: "Capacity Control",icon: "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4", requiresApproval: true },
   { href: "/dashboard/coach/athletes",    label: "My Athletes",     icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z", requiresApproval: true },
+  { href: "/dashboard/coach/training-analysis", label: "Training Analysis", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z", requiresApproval: true },
   { href: "/dashboard/coach/reports",     label: "Athlete Reports", icon: "M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", requiresApproval: true },
   { href: "/dashboard/coach/messages",    label: "Messages",        icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", requiresApproval: true },
   { href: "/dashboard/coach/profile",     label: "Profile",         icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z", requiresApproval: false },
@@ -37,10 +38,43 @@ export default function CoachSidebar() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (confirm("Logout?")) {
-      localStorage.clear();
-      router.push("/auth/login");
+      try {
+        // Get CSRF token
+        let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
+        
+        if (!csrfToken) {
+          await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
+          csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/auth/logout/`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+          },
+        });
+
+        console.log("Logout response:", response.status);
+        
+        // Clear localStorage regardless of response
+        localStorage.clear();
+        
+        // Clear all cookies
+        document.cookie.split(";").forEach((c) => {
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+        
+        // Force redirect to login
+        window.location.href = "/auth/login";
+      } catch (err) {
+        console.error("Logout failed", err);
+        localStorage.clear();
+        window.location.href = "/auth/login";
+      }
     }
   };
 

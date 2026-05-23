@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
 
@@ -9,6 +9,44 @@ export default function Login() {
   const [identifier, setIdentifier] = useState(""); // email or username
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [checking, setChecking] = useState(true);
+
+  // Check if already logged in
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/me/`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        // Already logged in, redirect to appropriate dashboard
+        if (data.role === 'admin') {
+          router.replace("/admin");
+        } else if (data.role === 'coach' || data.role === 'coach_pending') {
+          router.replace("/dashboard/coach");
+        } else {
+          router.replace("/dashboard/player");
+        }
+      } else {
+        setChecking(false);
+      }
+    } catch (err) {
+      setChecking(false);
+    }
+  };
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   const getCookie = (name: string) => {
     if (typeof document === "undefined") return null;

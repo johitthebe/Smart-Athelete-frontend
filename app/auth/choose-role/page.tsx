@@ -98,7 +98,26 @@ export default function ChooseRole() {
       if (res.ok) {
         // Redirect based on role
         if (selectedRole === "athlete") {
-          router.push("/dashboard/player");
+          // Check onboarding status for athletes
+          const onboardingRes = await fetch("/api/auth/onboarding/status/", {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+            },
+          });
+          
+          if (onboardingRes.ok) {
+            const onboardingData = await onboardingRes.json();
+            if (onboardingData.completed) {
+              router.push("/dashboard/player");
+            } else {
+              router.push("/auth/onboarding");
+            }
+          } else {
+            // If status check fails, go to onboarding to be safe
+            router.push("/auth/onboarding");
+          }
         } else if (selectedRole === "coach") {
           router.push("/dashboard/coach");
         }

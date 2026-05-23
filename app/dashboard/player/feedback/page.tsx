@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/lib/config";
+import { useNotifications } from "@/app/context/NotificationContext";
 
 type Feedback = {
   id: number;
@@ -31,6 +32,7 @@ export default function FeedbackPage() {
   const [loading, setLoading] = useState(true);
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [filter, setFilter] = useState<"all" | "unread" | "unacknowledged">("all");
+  const { refreshNotifications } = useNotifications();
 
   useEffect(() => {
     fetchFeedback();
@@ -74,6 +76,7 @@ export default function FeedbackPage() {
 
       if (response.ok) {
         fetchFeedback();
+        refreshNotifications(); // Refresh notification count immediately
       }
     } catch (error) {
       console.error("Error marking feedback as read:", error);
@@ -101,6 +104,7 @@ export default function FeedbackPage() {
       if (response.ok) {
         alert("Feedback acknowledged!");
         fetchFeedback();
+        refreshNotifications(); // Refresh notification count immediately
         setSelectedFeedback(null);
       }
     } catch (error) {

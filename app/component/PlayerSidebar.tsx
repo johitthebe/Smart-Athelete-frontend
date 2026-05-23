@@ -1,8 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { API_BASE_URL } from "@/lib/config";
+import { useNotifications } from "@/app/context/NotificationContext";
 
 const navItems = [
   { href: "/dashboard/player",               label: "Dashboard",           icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
@@ -21,27 +20,7 @@ const navItems = [
 export default function PlayerSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [unreadFeedbackCount, setUnreadFeedbackCount] = useState(0);
-
-  useEffect(() => {
-    fetchUnreadCounts();
-    const interval = setInterval(fetchUnreadCounts, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchUnreadCounts = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/performance/feedback/unread/`, {
-        credentials: "include",
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadFeedbackCount(data.count || 0);
-      }
-    } catch (err) {
-      console.error("Error fetching unread counts:", err);
-    }
-  };
+  const { unreadFeedbackCount } = useNotifications();
 
   return (
     <aside className="w-64 h-screen flex flex-col bg-white border-r border-gray-200 shadow-sm">

@@ -26,6 +26,7 @@ export default function AdminDashboard() {
   const [exerciseCount, setExerciseCount] = useState(0);
   const [goalsCount, setGoalsCount] = useState(0);
   const [pendingCoaches, setPendingCoaches] = useState<PendingCoach[]>([]);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,6 +69,12 @@ export default function AdminDashboard() {
       if (coachesRes.ok) {
         const coaches = await coachesRes.json();
         setPendingCoaches(coaches.slice(0, 3));
+      }
+
+      const activitiesRes = await fetch(`${API_BASE_URL}/api/auth/activities/feed/?limit=5&days=7`, { credentials: "include" });
+      if (activitiesRes.ok) {
+        const activities = await activitiesRes.json();
+        setRecentActivities(activities);
       }
     } catch (err) {
       console.error("Error fetching stats:", err);
@@ -212,25 +219,39 @@ export default function AdminDashboard() {
 
               {/* Recent Activity */}
               <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-600">New athlete registered</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-gray-600">Goal completed by athlete</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <span className="text-gray-600">New coach application</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                    <span className="text-gray-600">Performance log added</span>
-                  </div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+                  <button
+                    onClick={() => router.push("/admin/activity")}
+                    className="text-sm font-medium hover:underline"
+                    style={{ color: "#173B80" }}
+                  >
+                    View All →
+                  </button>
                 </div>
+                {recentActivities.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentActivities.map((activity) => (
+                      <div key={activity.id} className="flex items-start gap-3 text-sm">
+                        <div className={`w-2 h-2 rounded-full mt-1.5 ${
+                          activity.action_type.includes('goal') ? 'bg-blue-500' :
+                          activity.action_type.includes('workout') ? 'bg-green-500' :
+                          activity.action_type.includes('coach') ? 'bg-purple-500' :
+                          'bg-gray-400'
+                        }`}></div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-gray-900 font-medium truncate">{activity.user.full_name || activity.user.username}</p>
+                          <p className="text-gray-600 text-xs">{activity.description}</p>
+                        </div>
+                        <span className="text-xs text-gray-400 whitespace-nowrap">
+                          {new Date(activity.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 text-center py-4">No recent activities</p>
+                )}
               </div>
             </div>
           </div>
