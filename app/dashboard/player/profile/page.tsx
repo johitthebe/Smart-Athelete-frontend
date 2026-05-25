@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
 import ChangePasswordSection from "@/app/component/ChangePasswordSection";
+import ProfilePictureUpload from "@/app/component/ProfilePictureUpload";
 
 type User = {
   id: number;
@@ -12,6 +13,7 @@ type User = {
   first_name?: string;
   last_name?: string;
   role?: string;
+  profile_picture_url?: string | null;
 };
 
 export default function ProfilePage() {
@@ -170,8 +172,15 @@ export default function ProfilePage() {
         <div className="px-8 pb-8">
           <div className="flex items-end justify-between -mt-16 mb-6">
             <div className="flex items-end gap-4">
-              <div className="w-32 h-32 bg-white rounded-full border-4 border-white shadow-lg flex items-center justify-center">
-                <span className="text-4xl font-bold text-gray-700">{getInitials()}</span>
+              {/* Profile Picture with Upload Component */}
+              <div className="relative">
+                <ProfilePictureUpload
+                  currentPictureUrl={user?.profile_picture_url}
+                  onUploadSuccess={(newUrl) => {
+                    setUser(prev => prev ? { ...prev, profile_picture_url: newUrl } : null);
+                  }}
+                  userInitials={getInitials()}
+                />
               </div>
               <div className="pb-2">
                 <h2 className="text-2xl font-bold text-gray-900">{displayName}</h2>
