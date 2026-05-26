@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
+import SuccessToast from "@/app/component/SuccessToast";
 
 interface GoalSuggestion {
   id: number;
@@ -40,6 +41,8 @@ export default function AISuggestionsPage() {
   const [workoutSuggestions, setWorkoutSuggestions] = useState<WorkoutSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   useEffect(() => {
     checkAuthAndFetch();
@@ -200,7 +203,8 @@ export default function AISuggestionsPage() {
       const data = await response.json();
       
       if (response.ok) {
-        alert("Goal accepted and added to your goals!");
+        setToastMessage("Goal accepted and added to your goals!");
+        setShowSuccessToast(true);
         fetchSuggestions();
       } else {
         alert(`Error: ${data.error || "Failed to accept goal"}`);
@@ -258,7 +262,8 @@ export default function AISuggestionsPage() {
       const data = await response.json();
       
       if (response.ok) {
-        alert("Workout added to your training plan!");
+        setToastMessage("Workout added to your training plan!");
+        setShowSuccessToast(true);
         fetchSuggestions();
       } else {
         alert(`Error: ${data.error || "Failed to add workout"}`);
@@ -316,6 +321,14 @@ export default function AISuggestionsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+      {/* Success Toast */}
+      {showSuccessToast && (
+        <SuccessToast
+          message={toastMessage}
+          onClose={() => setShowSuccessToast(false)}
+        />
+      )}
+      
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900">AI-Powered Suggestions</h1>

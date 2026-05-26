@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/lib/config";
+import { useToast } from "@/app/component/ToastContainer";
 
 type Request = {
   id: number;
@@ -15,6 +16,7 @@ type Request = {
 };
 
 export default function CoachPendingRequestsPage() {
+  const toast = useToast();
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [rejecting, setRejecting] = useState<number | null>(null);
@@ -62,14 +64,15 @@ export default function CoachPendingRequestsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        alert(data.message);
+        toast.success(data.message || `${athleteName} accepted as your athlete! 🎉`);
         fetchRequests();
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to accept request");
+        toast.error(error.error || "Failed to accept request");
       }
     } catch (error) {
       console.error("Error accepting request:", error);
+      toast.error("Failed to accept request");
     }
   };
 
@@ -92,13 +95,14 @@ export default function CoachPendingRequestsPage() {
       });
 
       if (response.ok) {
-        alert("Request rejected");
+        toast.success("Request rejected successfully");
         setRejecting(null);
         setRejectReason("");
         fetchRequests();
       }
     } catch (error) {
       console.error("Error rejecting request:", error);
+      toast.error("Failed to reject request");
     }
   };
 

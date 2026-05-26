@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { API_BASE_URL } from "@/lib/config";
+import LogoutConfirmModal from "./LogoutConfirmModal";
 
 const navItems = [
   { href: "/admin",                   label: "Dashboard",       icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
@@ -17,6 +20,48 @@ const navItems = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      // Get CSRF token
+      let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
+      
+      if (!csrfToken) {
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
+        csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/logout/`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+        },
+      });
+
+      console.log("Logout response:", response.status);
+      
+      // Clear localStorage regardless of response
+      localStorage.clear();
+      
+      // Clear all cookies
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      
+      // Force redirect to login
+      window.location.href = "/auth/login";
+    } catch (err) {
+      console.error("Logout failed", err);
+      localStorage.clear();
+      window.location.href = "/auth/login";
+    }
+  };
 
   return (
     <aside
@@ -32,14 +77,11 @@ export default function AdminSidebar() {
         className="flex items-center gap-3 px-6 py-5"
         style={{ borderBottom: "1px solid var(--color-border)" }}
       >
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg, var(--color-navy) 0%, var(--color-electric) 100%)" }}
-        >
-          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        </div>
+        <img 
+          src="/logo.svg" 
+          alt="Smart Athlete Logo" 
+          className="w-10 h-10 object-contain"
+        />
         <div>
           <p className="font-bold text-sm" style={{ color: "var(--color-ink)", letterSpacing: "-0.3px" }}>
             Smart Athlete
@@ -92,7 +134,7 @@ export default function AdminSidebar() {
         style={{ borderTop: "1px solid var(--color-border)" }}
       >
         <div
-          className="flex items-center gap-2 px-3 py-2 rounded-lg"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg mb-3"
           style={{ background: "var(--color-navy-light)" }}
         >
           <div
@@ -108,7 +150,24 @@ export default function AdminSidebar() {
             <p className="text-[10px]" style={{ color: "var(--color-slate)" }}>Full Access</p>
           </div>
         </div>
+
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Logout
+        </button>
       </div>
+
+      <LogoutConfirmModal
+        isOpen={showLogoutModal}
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutModal(false)}
+        isLoading={isLoggingOut}
+      />
     </aside>
   );
 }

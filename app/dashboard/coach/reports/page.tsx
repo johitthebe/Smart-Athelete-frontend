@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Line, Bar, Radar } from "react-chartjs-2";
 import { API_BASE_URL } from "@/lib/config";
+import { useToast } from "@/app/component/ToastContainer";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -41,6 +42,7 @@ type Report = {
 };
 
 export default function CoachReportsPage() {
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState<"pending" | "reviewed">("pending");
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -96,17 +98,17 @@ export default function CoachReportsPage() {
       });
 
       if (response.ok) {
-        alert("Feedback sent successfully!");
+        toast.success("Feedback sent successfully! 🎉");
         setFeedbackText("");
         setSelectedReport(null);
         fetchReports();
       } else {
         const error = await response.json();
-        alert(`Failed to send feedback: ${error.error || JSON.stringify(error)}`);
+        toast.error(`Failed to send feedback: ${error.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error sending feedback:", error);
-      alert("Failed to send feedback");
+      toast.error("Failed to send feedback");
     }
   };
 

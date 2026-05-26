@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
+import { useToast } from "@/app/component/ToastContainer";
 
 type Message = {
   id: number;
@@ -29,12 +30,14 @@ type Athlete = {
 
 export default function CoachMessagesPage() {
   const router = useRouter();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState<"inbox" | "sent" | "compose">("inbox");
   const [messages, setMessages] = useState<Message[]>([]);
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
   // Compose form state
   const [composeForm, setComposeForm] = useState({
@@ -129,16 +132,16 @@ export default function CoachMessagesPage() {
       });
 
       if (response.ok) {
-        alert("Message sent successfully!");
+        toast.success("Message sent successfully!");
         setComposeForm({ recipient: "", subject: "", body: "" });
         setActiveTab("sent");
       } else {
         const error = await response.json();
-        alert(`Failed to send message: ${error.error || JSON.stringify(error)}`);
+        toast.error(`Failed to send message: ${error.error || JSON.stringify(error)}`);
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("Failed to send message");
+      toast.error("Failed to send message");
     }
   };
 
@@ -172,6 +175,36 @@ export default function CoachMessagesPage() {
     setSelectedMessage(message);
     if (!message.is_read && activeTab === "inbox") {
       await handleMarkAsRead(message.id);
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: number) => {
+    try {
+      let csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
+      
+      if (!csrfToken) {
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
+        csrfToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/performance/messages/${messageId}/`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {})
+        },
+      });
+
+      if (response.ok) {
+        toast.success("Message deleted successfully");
+        setDeleteConfirmId(null);
+        fetchMessages();
+      } else {
+        toast.error("Failed to delete message");
+      }
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      toast.error("Failed to delete message");
     }
   };
 
@@ -340,31 +373,65 @@ export default function CoachMessagesPage() {
           ) : (
             <div className="divide-y divide-gray-100">
               {messages.map((message) => (
-                <div
-                  key={message.id}
-                  onClick={() => viewMessage(message)}
-                  className={`p-5 hover:bg-gray-50 cursor-pointer transition ${
-                    !message.is_read && activeTab === "inbox" ? "bg-blue-50" : ""
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        {!message.is_read && activeTab === "inbox" && (
-                          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        )}
-                        <h3 className="font-semibold text-gray-900">{message.subject}</h3>
+                <div key={message.id} className="relative">
+                  {deleteConfirmId === message.id && (
+                    <div className="absolute inset-0 bg-red-50 border-l-4 border-red-600 flex items-center justify-between px-5 py-3 z-10 rounded-r">
+                      <p className="text-sm font-medium text-red-900">Delete this message?</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setDeleteConfirmId(null)}
+                          className="px-3 py-1 text-xs font-medium text-red-700 bg-white border border-red-300 rounded hover:bg-red-50"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMessage(message.id)}
+                          className="px-3 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700"
+                        >
+                          Delete
+                        </button>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {activeTab === "inbox" 
-                          ? `From: ${message.sender_name} (@${message.sender_username})`
-                          : `To: ${message.recipient_name} (@${message.recipient_username})`
-                        }
-                      </p>
-                      <p className="text-sm text-gray-500 line-clamp-2">{message.preview || message.body}</p>
                     </div>
-                    <div className="text-xs text-gray-500 ml-4">
-                      {new Date(message.created_at).toLocaleDateString()}
+                  )}
+                  <div
+                    className={`p-5 hover:bg-gray-50 cursor-pointer transition ${
+                      !message.is_read && activeTab === "inbox" ? "bg-blue-50" : ""
+                    } ${deleteConfirmId === message.id ? "opacity-30" : ""}`}
+                    onClick={() => deleteConfirmId === null && viewMessage(message)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          {!message.is_read && activeTab === "inbox" && (
+                            <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                          )}
+                          <h3 className="font-semibold text-gray-900">{message.subject}</h3>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {activeTab === "inbox" 
+                            ? `From: ${message.sender_name} (@${message.sender_username})`
+                            : `To: ${message.recipient_name} (@${message.recipient_username})`
+                          }
+                        </p>
+                        <p className="text-sm text-gray-500 line-clamp-2">{message.preview || message.body}</p>
+                      </div>
+                      <div className="flex items-center gap-3 ml-4">
+                        <div className="text-xs text-gray-500">
+                          {new Date(message.created_at).toLocaleDateString()}
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteConfirmId(deleteConfirmId === message.id ? null : message.id);
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
+                          title="Delete message"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

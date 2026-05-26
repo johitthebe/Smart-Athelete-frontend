@@ -26,6 +26,8 @@ type Goal = {
     remaining: number;
   };
   log_count: number;
+  best_performance: number | null;
+  gap_to_target: number | null;
   created_at: string;
 };
 
@@ -124,10 +126,44 @@ export default function GoalsPage() {
         });
         fetchGoals();
       } else {
-        setError(data.error || Object.values(data).flat().join(", "));
+        // Handle specific validation errors
+        let errorMessage = "Failed to create goal. ";
+        
+        if (data.name) {
+          errorMessage += Array.isArray(data.name) ? data.name[0] : data.name;
+        } else if (data.target_value) {
+          errorMessage += Array.isArray(data.target_value) ? data.target_value[0] : data.target_value;
+        } else if (data.deadline) {
+          errorMessage += Array.isArray(data.deadline) ? data.deadline[0] : data.deadline;
+        } else if (data.activity_type_id) {
+          errorMessage += Array.isArray(data.activity_type_id) ? data.activity_type_id[0] : data.activity_type_id;
+        } else if (data.error) {
+          errorMessage += data.error;
+        } else if (data.detail) {
+          errorMessage += data.detail;
+        } else if (data.non_field_errors) {
+          errorMessage += Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : data.non_field_errors;
+        } else {
+          // Try to extract any error messages from the response
+          const errors = Object.entries(data)
+            .filter(([key, value]) => key !== 'error' && value)
+            .map(([key, value]) => {
+              const msg = Array.isArray(value) ? value[0] : value;
+              return `${key}: ${msg}`;
+            });
+          
+          if (errors.length > 0) {
+            errorMessage += errors.join(", ");
+          } else {
+            errorMessage += "Please check all fields and try again.";
+          }
+        }
+        
+        setError(errorMessage);
       }
     } catch (err) {
-      setError("An error occurred while creating the goal");
+      console.error("Goal creation error:", err);
+      setError("Cannot connect to the server. Please ensure the backend is running and try again.");
     }
   };
 
@@ -454,9 +490,27 @@ export default function GoalsPage() {
                       style={{ width: `${Math.min(goal.progress.percentage, 100)}%` }}
                     />
                   </div>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="grid grid-cols-2 gap-4 mt-3 pt-3 border-t border-gray-200">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Best Performance</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {goal.best_performance !== null 
+                          ? `${goal.best_performance} ${goal.target_unit}` 
+                          : '-'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Gap to Target</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {goal.gap_to_target !== null 
+                          ? `${goal.gap_to_target} ${goal.target_unit}` 
+                          : '-'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-gray-500 pt-2">
                     <span>
-                      {goal.progress.current_value.toFixed(1)} / {goal.target_value} {goal.target_unit}
+                      Current: {goal.progress.current_value.toFixed(1)} / {goal.target_value} {goal.target_unit}
                     </span>
                     <span>{goal.progress.remaining.toFixed(1)} {goal.target_unit} remaining</span>
                   </div>

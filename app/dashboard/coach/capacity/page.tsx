@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/lib/config";
+import { useToast } from "@/app/component/ToastContainer";
 
 type CapacityStatus = {
   accepting_requests: boolean;
@@ -14,6 +15,7 @@ type CapacityStatus = {
 };
 
 export default function CoachCapacityPage() {
+  const toast = useToast();
   const [status, setStatus] = useState<CapacityStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [pauseReason, setPauseReason] = useState("");
@@ -60,13 +62,14 @@ export default function CoachCapacityPage() {
       });
 
       if (response.ok) {
-        alert("New requests paused");
+        toast.success("New requests paused successfully! ⏸️");
         setShowPauseModal(false);
         setPauseReason("");
         fetchStatus();
       }
     } catch (error) {
       console.error("Error pausing:", error);
+      toast.error("Failed to pause requests");
     }
   };
 
@@ -89,11 +92,12 @@ export default function CoachCapacityPage() {
       });
 
       if (response.ok) {
-        alert("Now accepting requests");
+        toast.success("Now accepting requests! ✅");
         fetchStatus();
       }
     } catch (error) {
       console.error("Error resuming:", error);
+      toast.error("Failed to resume requests");
     }
   };
 

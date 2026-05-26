@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/lib/config";
+import { useToast } from "@/app/component/ToastContainer";
 
 type Credential = {
   id: number;
@@ -14,6 +15,7 @@ type Credential = {
 };
 
 export default function CoachCredentialsPage() {
+  const toast = useToast();
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUploadForm, setShowUploadForm] = useState(false);
@@ -89,7 +91,7 @@ export default function CoachCredentialsPage() {
       });
 
       if (response.ok) {
-        alert("Credential uploaded successfully!");
+        toast.success("Credential uploaded successfully! 🎉");
         setShowUploadForm(false);
         setFormData({
           credential_type: "",
@@ -101,11 +103,11 @@ export default function CoachCredentialsPage() {
         fetchCredentials();
       } else {
         const error = await response.json();
-        alert(`Failed to upload credential: ${error.error || JSON.stringify(error)}`);
+        toast.error(`Failed to upload credential: ${error.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error uploading credential:", error);
-      alert("Failed to upload credential");
+      toast.error("Failed to upload credential");
     } finally {
       setUploading(false);
     }

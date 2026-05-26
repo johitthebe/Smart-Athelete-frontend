@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import SuccessToast from "@/app/component/SuccessToast";
 
 interface GoalSuggestion {
   difficulty_level: string;
@@ -22,6 +23,7 @@ interface GoalSuggestionModalProps {
 export default function GoalSuggestionModal({ suggestions, onAccept, onSkip }: GoalSuggestionModalProps) {
   const [selectedGoal, setSelectedGoal] = useState<GoalSuggestion | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const getCookie = (name: string) => {
     if (typeof document === "undefined") return null;
@@ -67,10 +69,25 @@ export default function GoalSuggestionModal({ suggestions, onAccept, onSkip }: G
       const deadlineDate = new Date();
       deadlineDate.setDate(deadlineDate.getDate() + goal.deadline_weeks * 7);
 
+      // Determine target_metric based on the unit
+      let targetMetric = 'distance'; // default
+      const unitLower = goal.unit.toLowerCase();
+      
+      if (unitLower.includes('km') || unitLower.includes('mile') || unitLower.includes('meter')) {
+        targetMetric = 'distance';
+      } else if (unitLower.includes('min') || unitLower.includes('hour') || unitLower.includes('sec')) {
+        targetMetric = 'duration';
+      } else if (unitLower.includes('cal') || unitLower.includes('kcal')) {
+        targetMetric = 'calories';
+      } else if (unitLower.includes('pace') || unitLower.includes('/km') || unitLower.includes('/mile')) {
+        targetMetric = 'pace';
+      }
+
       const goalData = {
-        name: `${goal.event} Goal`,
-        description: goal.reasoning,
-        target_metric: goal.event,
+        name: `${goal.event} - ${goal.target_value}${goal.unit}`,
+        description: `${goal.reasoning}\n\nTraining Required: ${goal.training_required}\n\nKey Tip: ${goal.key_tip}`,
+        event: goal.event,
+        target_metric: targetMetric,
         target_value: goal.target_value,
         target_unit: goal.unit,
         deadline: deadlineDate.toISOString().split("T")[0],
@@ -93,13 +110,21 @@ export default function GoalSuggestionModal({ suggestions, onAccept, onSkip }: G
       console.log("Goal creation response:", responseData);
 
       if (response.ok) {
-        // Goal created successfully, redirect to dashboard
+        // Goal created successfully, show toast and redirect
         console.log("Goal created successfully, redirecting to dashboard");
-        onAccept();
+        setShowSuccessToast(true);
+        
+        // Redirect after showing toast briefly
+        setTimeout(() => {
+          onAccept();
+        }, 1500);
       } else {
         console.error("Failed to create goal:", responseData);
-        // Still redirect to dashboard even if goal creation fails
-        alert("Goal creation failed, but you can create goals manually from your dashboard.");
+        // Show specific error message
+        const errorMsg = responseData.target_metric 
+          ? `Invalid target metric: ${responseData.target_metric}`
+          : responseData.error || "Goal creation failed";
+        alert(`${errorMsg}. You can create goals manually from your dashboard.`);
         onAccept();
       }
     } catch (error) {
@@ -107,11 +132,21 @@ export default function GoalSuggestionModal({ suggestions, onAccept, onSkip }: G
       // Still redirect to dashboard even on network error
       alert("Network error creating goal, but you can create goals manually from your dashboard.");
       onAccept();
+    } finally {
+      setIsCreating(false);
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      {/* Success Toast */}
+      {showSuccessToast && (
+        <SuccessToast
+          message="Goal created successfully! Redirecting to dashboard..."
+          onClose={() => setShowSuccessToast(false)}
+        />
+      )}
+      
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">🎯 Your Personalized Goal Suggestions</h2>

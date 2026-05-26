@@ -6,10 +6,11 @@ import { API_BASE_URL } from "@/lib/config";
 interface ProfilePictureUploadProps {
   currentPictureUrl?: string | null;
   onUploadSuccess?: (newUrl: string) => void;
+  onDeleteSuccess?: () => void;
   userInitials?: string;
 }
 
-export default function ProfilePictureUpload({ currentPictureUrl, onUploadSuccess, userInitials = "U" }: ProfilePictureUploadProps) {
+export default function ProfilePictureUpload({ currentPictureUrl, onUploadSuccess, onDeleteSuccess, userInitials = "U" }: ProfilePictureUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentPictureUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -74,7 +75,6 @@ export default function ProfilePictureUpload({ currentPictureUrl, onUploadSucces
         if (onUploadSuccess) {
           onUploadSuccess(data.user.profile_picture_url);
         }
-        alert("Profile picture updated successfully!");
       } else {
         alert(data.error || "Failed to upload profile picture");
         setPreviewUrl(currentPictureUrl || null);
@@ -106,10 +106,12 @@ export default function ProfilePictureUpload({ currentPictureUrl, onUploadSucces
 
       if (response.ok) {
         setPreviewUrl(null);
+        if (onDeleteSuccess) {
+          onDeleteSuccess();
+        }
         if (onUploadSuccess) {
           onUploadSuccess("");
         }
-        alert("Profile picture deleted successfully!");
       } else {
         const data = await response.json();
         alert(data.error || "Failed to delete profile picture");
@@ -195,11 +197,6 @@ export default function ProfilePictureUpload({ currentPictureUrl, onUploadSucces
           </button>
         )}
       </div>
-
-      {/* Help Text */}
-      <p className="text-xs text-gray-500 text-center max-w-xs">
-        Recommended: Square image, at least 200x200px. Max size: 5MB. Formats: JPG, PNG, GIF, WEBP
-      </p>
     </div>
   );
 }

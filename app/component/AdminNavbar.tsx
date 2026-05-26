@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
 import NotificationBell from "./NotificationBell";
+import LogoutConfirmModal from "./LogoutConfirmModal";
 
 type User = {
   id: number;
@@ -16,6 +17,8 @@ type User = {
 
 export default function AdminNavbar() {
   const [user, setUser] = useState<User | null>(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -37,42 +40,43 @@ export default function AdminNavbar() {
   };
 
   const handleLogout = async () => {
-    if (confirm("Logout?")) {
-      try {
-        // Get CSRF token
-        let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
-        
-        if (!csrfToken) {
-          await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
-          csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
-        }
-
-        const response = await fetch(`${API_BASE_URL}/api/auth/logout/`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
-          },
-        });
-
-        console.log("Logout response:", response.status);
-        
-        // Clear localStorage regardless of response
-        localStorage.clear();
-        
-        // Clear all cookies
-        document.cookie.split(";").forEach((c) => {
-          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
-        
-        // Force redirect to login
-        window.location.href = "/auth/login";
-      } catch (err) {
-        console.error("Logout failed", err);
-        localStorage.clear();
-        window.location.href = "/auth/login";
+    setIsLoggingOut(true);
+    try {
+      // Get CSRF token
+      let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
+      
+      if (!csrfToken) {
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
+        csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
       }
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/logout/`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+        },
+      });
+
+      console.log("Logout response:", response.status);
+      
+      // Clear localStorage regardless of response
+      localStorage.clear();
+      
+      // Clear all cookies
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      
+      // Force redirect to login
+      window.location.href = "/auth/login";
+    } catch (err) {
+      console.error("Logout failed", err);
+      localStorage.clear();
+      window.location.href = "/auth/login";
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -111,7 +115,7 @@ export default function AdminNavbar() {
           </button>
           
           <button 
-            onClick={handleLogout}
+            onClick={() => setShowLogoutModal(true)}
             className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,6 +125,13 @@ export default function AdminNavbar() {
           </button>
         </div>
       </div>
+
+      <LogoutConfirmModal
+        isOpen={showLogoutModal}
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutModal(false)}
+        isLoading={isLoggingOut}
+      />
     </header>
   );
 }

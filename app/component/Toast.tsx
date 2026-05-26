@@ -24,7 +24,7 @@ export default function Toast({ message, type, onClose, duration = 3000 }: Toast
     switch (type) {
       case "success":
         return (
-          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         );
@@ -52,7 +52,7 @@ export default function Toast({ message, type, onClose, duration = 3000 }: Toast
   const getStyles = () => {
     switch (type) {
       case "success":
-        return "bg-green-50 border-green-200";
+        return "bg-green-600 border-green-700 text-white";
       case "error":
         return "bg-red-50 border-red-200";
       case "warning":
@@ -62,15 +62,39 @@ export default function Toast({ message, type, onClose, duration = 3000 }: Toast
     }
   };
 
+  const getTextColor = () => {
+    switch (type) {
+      case "success":
+        return "text-white";
+      case "error":
+      case "warning":
+      case "info":
+        return "text-gray-900";
+    }
+  };
+
+  const getCloseButtonColor = () => {
+    switch (type) {
+      case "success":
+        return "text-white/80 hover:text-white";
+      case "error":
+      case "warning":
+      case "info":
+        return "text-gray-400 hover:text-gray-600";
+    }
+  };
+
   return (
     <div
       className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg ${getStyles()} animate-slide-in-right`}
     >
-      {getIcon()}
-      <p className="text-sm font-medium text-gray-900 flex-1">{message}</p>
+      <div className={`flex-shrink-0 ${type === "success" ? "bg-green-700 rounded-full p-0.5" : ""}`}>
+        {getIcon()}
+      </div>
+      <p className={`text-sm font-medium ${getTextColor()} flex-1`}>{message}</p>
       <button
         onClick={onClose}
-        className="text-gray-400 hover:text-gray-600 transition-colors"
+        className={`${getCloseButtonColor()} transition-colors`}
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/lib/config";
 import { useNotifications } from "@/app/context/NotificationContext";
+import { useToast } from "@/app/component/ToastContainer";
 
 type Feedback = {
   id: number;
@@ -14,6 +15,7 @@ type Feedback = {
   is_acknowledged: boolean;
   read_at: string | null;
   acknowledged_at: string | null;
+  rating: number | null;
   created_at: string;
   goal_details: {
     id: number;
@@ -28,10 +30,13 @@ type Feedback = {
 };
 
 export default function FeedbackPage() {
+  const toast = useToast();
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [filter, setFilter] = useState<"all" | "unread" | "unacknowledged">("all");
+  const [rating, setRating] = useState<number>(0);
+  const [hoveredStar, setHoveredStar] = useState<number>(0);
   const { refreshNotifications } = useNotifications();
 
   useEffect(() => {
@@ -75,11 +80,54 @@ export default function FeedbackPage() {
       });
 
       if (response.ok) {
+        toast.success("Feedback marked as read");
         fetchFeedback();
-        refreshNotifications(); // Refresh notification count immediately
+        refreshNotifications();
+      } else {
+        toast.error("Failed to mark feedback as read");
       }
     } catch (error) {
       console.error("Error marking feedback as read:", error);
+      toast.error("Failed to mark feedback as read");
+    }
+  };
+
+  const markAllAsRead = async () => {
+    const unreadCount = feedback.filter((f) => !f.is_read).length;
+    
+    if (unreadCount === 0) {
+      toast.info("No unread feedback");
+      return;
+    }
+
+    try {
+      let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
+
+      if (!csrfToken) {
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
+        csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/performance/feedback/mark_all_read/`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast.success(`${data.count} feedback items marked as read! ✅`);
+        fetchFeedback();
+        refreshNotifications();
+      } else {
+        toast.error("Failed to mark all as read");
+      }
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+      toast.error("Failed to mark all as read");
     }
   };
 
@@ -99,22 +147,27 @@ export default function FeedbackPage() {
           "Content-Type": "application/json",
           ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
         },
+        body: JSON.stringify({ rating: rating > 0 ? rating : null }),
       });
 
       if (response.ok) {
-        alert("Feedback acknowledged!");
+        toast.success("Feedback acknowledged! 🎉");
         fetchFeedback();
-        refreshNotifications(); // Refresh notification count immediately
+        refreshNotifications();
         setSelectedFeedback(null);
+        setRating(0);
+      } else {
+        toast.error("Failed to acknowledge feedback");
       }
     } catch (error) {
       console.error("Error acknowledging feedback:", error);
-      alert("Failed to acknowledge feedback");
+      toast.error("Failed to acknowledge feedback");
     }
   };
 
   const handleFeedbackClick = (fb: Feedback) => {
     setSelectedFeedback(fb);
+    setRating(fb.rating || 0);
     if (!fb.is_read) {
       markAsRead(fb.id);
     }
@@ -158,37 +211,48 @@ export default function FeedbackPage() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 mb-6">
-        <button
-          onClick={() => setFilter("all")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filter === "all"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          All ({feedback.length})
-        </button>
-        <button
-          onClick={() => setFilter("unread")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filter === "unread"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          Unread ({feedback.filter((f) => !f.is_read).length})
-        </button>
-        <button
-          onClick={() => setFilter("unacknowledged")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filter === "unacknowledged"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          Needs Acknowledgment ({feedback.filter((f) => !f.is_acknowledged).length})
-        </button>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setFilter("all")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filter === "all"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            All ({feedback.length})
+          </button>
+          <button
+            onClick={() => setFilter("unread")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filter === "unread"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Unread ({feedback.filter((f) => !f.is_read).length})
+          </button>
+          <button
+            onClick={() => setFilter("unacknowledged")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filter === "unacknowledged"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Needs Acknowledgment ({feedback.filter((f) => !f.is_acknowledged).length})
+          </button>
+        </div>
+        
+        {feedback.filter((f) => !f.is_read).length > 0 && (
+          <button
+            onClick={markAllAsRead}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-sm transition-colors"
+          >
+            Mark All Read
+          </button>
+        )}
       </div>
 
       {filteredFeedback.length === 0 ? (
@@ -347,14 +411,94 @@ export default function FeedbackPage() {
                       Acknowledged on{" "}
                       {new Date(selectedFeedback.acknowledged_at!).toLocaleDateString()}
                     </p>
+                    {selectedFeedback.rating && (
+                      <div className="mt-2 flex items-center justify-center gap-1">
+                        <span className="text-sm text-green-700">Your rating:</span>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <svg
+                            key={star}
+                            className={`w-5 h-5 ${
+                              star <= selectedFeedback.rating!
+                                ? "text-yellow-500 fill-yellow-500"
+                                : "text-gray-300"
+                            }`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                            />
+                          </svg>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <button
-                    onClick={() => acknowledgeFeedback(selectedFeedback.id)}
-                    className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors"
-                  >
-                    Acknowledge Feedback
-                  </button>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Rate this feedback (optional)
+                      </label>
+                      <div className="flex items-center gap-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setRating(star)}
+                            onMouseEnter={() => setHoveredStar(star)}
+                            onMouseLeave={() => setHoveredStar(0)}
+                            className="focus:outline-none transition-transform hover:scale-110"
+                          >
+                            <svg
+                              className={`w-8 h-8 ${
+                                star <= (hoveredStar || rating)
+                                  ? "text-yellow-500 fill-yellow-500"
+                                  : "text-gray-300"
+                              }`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                              />
+                            </svg>
+                          </button>
+                        ))}
+                        {rating > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setRating(0)}
+                            className="ml-2 text-sm text-gray-500 hover:text-gray-700"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      {rating > 0 && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {rating === 1 && "Not helpful"}
+                          {rating === 2 && "Somewhat helpful"}
+                          {rating === 3 && "Helpful"}
+                          {rating === 4 && "Very helpful"}
+                          {rating === 5 && "Extremely helpful"}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => acknowledgeFeedback(selectedFeedback.id)}
+                      className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors"
+                    >
+                      Acknowledge Feedback
+                    </button>
+                  </div>
                 )}
               </div>
             ) : (

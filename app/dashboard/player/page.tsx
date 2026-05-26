@@ -35,6 +35,7 @@ type PerformanceLog = {
   intensity: number;
   notes: string;
   goal: { id: number; name: string } | null;
+  is_personal_best?: boolean;
 };
 
 type Stats = {
@@ -280,18 +281,33 @@ export default function PlayerDashboard() {
                 {recentLogs.slice(0, 5).map((log) => (
                   <div
                     key={log.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-all cursor-default"
+                    className={`flex items-center justify-between p-3 rounded-lg hover:bg-blue-50 transition-all cursor-default ${
+                      log.is_personal_best ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300' : 'bg-gray-50'
+                    }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        log.is_personal_best ? 'bg-yellow-100' : 'bg-blue-100'
+                      }`}>
+                        {log.is_personal_best ? (
+                          <span className="text-lg">🏆</span>
+                        ) : (
+                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                        )}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {log.activity_type?.name || log.event || "Activity"}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-gray-900">
+                            {log.activity_type?.name || log.event || "Activity"}
+                          </p>
+                          {log.is_personal_best && (
+                            <span className="px-2 py-0.5 bg-yellow-400 text-yellow-900 text-[10px] font-bold rounded-full">
+                              PB
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-gray-600">{formatDate(log.date)}</p>
                         {log.goal && (
                           <p className="text-xs text-blue-600 mt-0.5">
@@ -302,7 +318,9 @@ export default function PlayerDashboard() {
                     </div>
                     <div className="text-right">
                       {log.distance && (
-                        <p className="text-sm font-semibold text-gray-900">{log.distance} km</p>
+                        <p className={`text-sm font-semibold ${log.is_personal_best ? 'text-yellow-900' : 'text-gray-900'}`}>
+                          {log.distance} km
+                        </p>
                       )}
                       {log.duration && (
                         <p className="text-xs text-gray-600">{formatDuration(log.duration)}</p>

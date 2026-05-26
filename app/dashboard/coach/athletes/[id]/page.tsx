@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
+import SuccessToast from "@/app/component/SuccessToast";
+import { useToast } from "@/app/component/ToastContainer";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -67,6 +69,7 @@ export default function AthleteDetailPage() {
   const params = useParams();
   const router = useRouter();
   const athleteId = params.id as string;
+  const toast = useToast();
 
   const [athlete, setAthlete] = useState<Athlete | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -174,17 +177,17 @@ export default function AthleteDetailPage() {
       });
 
       if (response.ok) {
-        alert("Feedback sent successfully!");
+        toast.success("Feedback sent successfully! 🎉");
         setFeedbackForm({ feedback_type: "general", title: "", message: "" });
         setShowFeedbackForm(false);
         fetchAthleteData();
       } else {
         const error = await response.json();
-        alert(`Failed to send feedback: ${JSON.stringify(error)}`);
+        toast.error(`Failed to send feedback: ${error.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error sending feedback:", error);
-      alert("Failed to send feedback");
+      toast.error("Failed to send feedback");
     }
   };
 

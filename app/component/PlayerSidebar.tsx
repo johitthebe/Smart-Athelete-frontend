@@ -26,11 +26,11 @@ export default function PlayerSidebar() {
     <aside className="w-64 h-screen flex flex-col bg-white border-r border-gray-200 shadow-sm">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200">
-        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
-          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        </div>
+        <img 
+          src="/logo.svg" 
+          alt="Smart Athlete Logo" 
+          className="w-10 h-10 object-contain"
+        />
         <div>
           <p className="font-bold text-sm text-gray-900">Smart Athlete</p>
           <p className="text-xs text-gray-500">Athlete Panel</p>

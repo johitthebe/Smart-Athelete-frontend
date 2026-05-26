@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
+import SuccessToast from "@/app/component/SuccessToast";
 
 export default function Signup() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function Signup() {
   const [lastName, setLastName] = useState("");
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(true);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Check if already logged in
   useEffect(() => {
@@ -100,38 +102,81 @@ export default function Signup() {
 
       if (res.ok) {
         // User is now logged in automatically
-        // Redirect to choose role page
-        router.push("/auth/choose-role");
+        // Show success toast
+        setShowSuccessToast(true);
+        
+        // Redirect to choose role page after a brief delay
+        setTimeout(() => {
+          router.push("/auth/choose-role");
+        }, 1500);
       } else {
         console.log("REGISTER ERROR:", data);
         
-        // Handle specific error messages
-        let errorMessage = "Registration failed.";
+        // Handle specific error messages with detailed explanations
+        let errorMessage = "Registration failed. Please try again.";
         
+        // Check for field-specific errors
         if (data?.username) {
-          errorMessage = Array.isArray(data.username) 
-            ? data.username[0] 
-            : "Username already exists or is invalid.";
+          const usernameError = Array.isArray(data.username) ? data.username[0] : data.username;
+          if (usernameError.toLowerCase().includes('already exists') || usernameError.toLowerCase().includes('taken')) {
+            errorMessage = "This username is already taken. Please choose a different username.";
+          } else if (usernameError.toLowerCase().includes('invalid')) {
+            errorMessage = "Invalid username. Use only letters, numbers, and underscores.";
+          } else {
+            errorMessage = `Username error: ${usernameError}`;
+          }
         } else if (data?.email) {
-          errorMessage = Array.isArray(data.email)
-            ? data.email[0]
-            : "Email already exists or is invalid.";
+          const emailError = Array.isArray(data.email) ? data.email[0] : data.email;
+          if (emailError.toLowerCase().includes('already exists') || emailError.toLowerCase().includes('taken')) {
+            errorMessage = "This email is already registered. Please use a different email or try logging in.";
+          } else if (emailError.toLowerCase().includes('invalid')) {
+            errorMessage = "Invalid email address. Please enter a valid email.";
+          } else {
+            errorMessage = `Email error: ${emailError}`;
+          }
+        } else if (data?.password) {
+          const passwordError = Array.isArray(data.password) ? data.password[0] : data.password;
+          if (passwordError.toLowerCase().includes('too short')) {
+            errorMessage = "Password is too short. Please use at least 8 characters.";
+          } else if (passwordError.toLowerCase().includes('too common')) {
+            errorMessage = "This password is too common. Please choose a more secure password.";
+          } else if (passwordError.toLowerCase().includes('numeric')) {
+            errorMessage = "Password cannot be entirely numeric. Please include letters.";
+          } else {
+            errorMessage = `Password error: ${passwordError}`;
+          }
         } else if (data?.error) {
           errorMessage = data.error;
         } else if (data?.detail) {
           errorMessage = data.detail;
+        } else if (data?.non_field_errors) {
+          errorMessage = Array.isArray(data.non_field_errors) 
+            ? data.non_field_errors[0] 
+            : data.non_field_errors;
+        } else if (res.status === 400) {
+          errorMessage = "Invalid registration data. Please check all fields and try again.";
+        } else if (res.status === 500) {
+          errorMessage = "Server error. Please try again later or contact support.";
         }
         
         setError(errorMessage);
       }
     } catch (err) {
-      console.error(err);
-      setError("Server error. Try again later.");
+      console.error("Network or server error:", err);
+      setError("Cannot connect to the server. Please ensure the backend is running and try again.");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
+      {/* Success Toast */}
+      {showSuccessToast && (
+        <SuccessToast
+          message="Account created successfully! Redirecting..."
+          onClose={() => setShowSuccessToast(false)}
+        />
+      )}
+      
       <div className="w-full max-w-xl px-6">
         {/* back button etc. – keep whatever UI you already have here */}
 

@@ -41,6 +41,11 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-6xl items-center justify-between py-4 px-6">
         {/* Left: logo -> dashboard */}
         <Link href={dashboardHref} className="flex items-center gap-2">
+          <img 
+            src="/logo.svg" 
+            alt="Smart Athlete Logo" 
+            className="w-8 h-8 object-contain"
+          />
           <span className="font-bold text-blue-700">Smart Athlete</span>
         </Link>
 

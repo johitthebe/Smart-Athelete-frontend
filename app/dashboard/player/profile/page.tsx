@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
 import ChangePasswordSection from "@/app/component/ChangePasswordSection";
 import ProfilePictureUpload from "@/app/component/ProfilePictureUpload";
+import SuccessToast from "@/app/component/SuccessToast";
 
 type User = {
   id: number;
@@ -28,6 +29,8 @@ export default function ProfilePage() {
     email: "",
   });
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     fetchUserData();
@@ -81,7 +84,9 @@ export default function ProfilePage() {
         const data = await response.json();
         setUser(data);
         setEditing(false);
-        setMessage({ type: "success", text: "Profile updated successfully!" });
+        setMessage(null);
+        setSuccessMessage("Profile updated successfully!");
+        setShowSuccessToast(true);
         
         // Update localStorage
         localStorage.setItem("user", JSON.stringify(data));
@@ -132,6 +137,14 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-8 py-6 space-y-6">
+      {/* Success Toast */}
+      {showSuccessToast && (
+        <SuccessToast
+          message={successMessage}
+          onClose={() => setShowSuccessToast(false)}
+        />
+      )}
+      
       {/* Header */}
       <div className="pb-4">
         <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
@@ -178,6 +191,12 @@ export default function ProfilePage() {
                   currentPictureUrl={user?.profile_picture_url}
                   onUploadSuccess={(newUrl) => {
                     setUser(prev => prev ? { ...prev, profile_picture_url: newUrl } : null);
+                    setSuccessMessage("Profile picture updated successfully!");
+                    setShowSuccessToast(true);
+                  }}
+                  onDeleteSuccess={() => {
+                    setSuccessMessage("Profile picture deleted successfully!");
+                    setShowSuccessToast(true);
                   }}
                   userInitials={getInitials()}
                 />

@@ -160,7 +160,12 @@ export default function LogPerformancePage() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success("Performance logged successfully! 🎉");
+        // Check if this is a new personal best
+        if (data.is_personal_best) {
+          toast.success(`🏆 NEW PERSONAL BEST! Performance logged successfully! 🎉`);
+        } else {
+          toast.success("Performance logged successfully! 🎉");
+        }
         setFormData({
           goal_id: formData.goal_id,
           activity_type_id: formData.activity_type_id,

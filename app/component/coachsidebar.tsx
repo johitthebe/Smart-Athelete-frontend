@@ -4,6 +4,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "@/lib/config";
+import LogoutConfirmModal from "./LogoutConfirmModal";
 
 const navItems = [
   { href: "/dashboard/coach",             label: "Dashboard",       icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6", requiresApproval: false },
@@ -21,6 +22,8 @@ export default function CoachSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isApproved, setIsApproved] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     checkApprovalStatus();
@@ -39,42 +42,41 @@ export default function CoachSidebar() {
   };
 
   const handleLogout = async () => {
-    if (confirm("Logout?")) {
-      try {
-        // Get CSRF token
-        let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
-        
-        if (!csrfToken) {
-          await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
-          csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
-        }
-
-        const response = await fetch(`${API_BASE_URL}/api/auth/logout/`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
-          },
-        });
-
-        console.log("Logout response:", response.status);
-        
-        // Clear localStorage regardless of response
-        localStorage.clear();
-        
-        // Clear all cookies
-        document.cookie.split(";").forEach((c) => {
-          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
-        
-        // Force redirect to login
-        window.location.href = "/auth/login";
-      } catch (err) {
-        console.error("Logout failed", err);
-        localStorage.clear();
-        window.location.href = "/auth/login";
+    setIsLoggingOut(true);
+    try {
+      // Get CSRF token
+      let csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
+      
+      if (!csrfToken) {
+        await fetch(`${API_BASE_URL}/api/csrf/`, { credentials: "include" });
+        csrfToken = document.cookie.split("csrftoken=")[1]?.split(";")[0];
       }
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/logout/`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+        },
+      });
+
+      console.log("Logout response:", response.status);
+      
+      // Clear localStorage regardless of response
+      localStorage.clear();
+      
+      // Clear all cookies
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      
+      // Force redirect to login
+      window.location.href = "/auth/login";
+    } catch (err) {
+      console.error("Logout failed", err);
+      localStorage.clear();
+      window.location.href = "/auth/login";
     }
   };
 
@@ -82,11 +84,11 @@ export default function CoachSidebar() {
     <aside className="w-64 flex flex-col h-screen bg-white border-r border-gray-200 shadow-sm">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200">
-        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
-          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        </div>
+        <img 
+          src="/logo.svg" 
+          alt="Smart Athlete Logo" 
+          className="w-10 h-10 object-contain"
+        />
         <div>
           <p className="font-bold text-sm text-gray-900">Smart Athlete</p>
           <p className="text-xs text-gray-500">Coach Panel</p>
@@ -137,7 +139,7 @@ export default function CoachSidebar() {
       {/* User footer */}
       <div className="p-3 border-t border-gray-200">
         <button
-          onClick={handleLogout}
+          onClick={() => setShowLogoutModal(true)}
           className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,6 +148,13 @@ export default function CoachSidebar() {
           Logout
         </button>
       </div>
+
+      <LogoutConfirmModal
+        isOpen={showLogoutModal}
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutModal(false)}
+        isLoading={isLoggingOut}
+      />
     </aside>
   );
 }

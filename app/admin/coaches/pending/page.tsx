@@ -5,6 +5,7 @@ import Sidebar from "@/app/component/adminsidebar";
 import AdminNavbar from "@/app/component/AdminNavbar";
 import { API_BASE_URL } from "@/lib/config";
 import { ensureCsrfToken, getFetchHeaders } from "@/lib/csrf";
+import { useToast } from "@/app/component/ToastContainer";
 
 type PendingCoach = {
   id: number;
@@ -27,6 +28,7 @@ type PendingCoach = {
 };
 
 export default function PendingCoachesPage() {
+  const toast = useToast();
   const [coaches, setCoaches] = useState<PendingCoach[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCoach, setSelectedCoach] = useState<PendingCoach | null>(null);
@@ -75,7 +77,7 @@ export default function PendingCoachesPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess("Coach approved successfully");
+        toast.success("Coach approved successfully! ✅");
         setSelectedCoach(null);
         fetchPendingCoaches();
       } else {
@@ -111,7 +113,7 @@ export default function PendingCoachesPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess("Coach rejected successfully");
+        toast.success("Coach rejected successfully");
         setSelectedCoach(null);
         setShowRejectForm(false);
         setRejectionReason("");
@@ -140,12 +142,6 @@ export default function PendingCoachesPage() {
           </header>
 
           {/* Success/Error Messages */}
-          {success && (
-            <div className="rounded-xl bg-green-50 border border-green-200 p-4">
-              <p className="text-sm text-green-800">{success}</p>
-            </div>
-          )}
-
           {error && (
             <div className="rounded-xl bg-red-50 border border-red-200 p-4">
               <p className="text-sm text-red-800">{error}</p>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
+import SuccessToast from "@/app/component/SuccessToast";
 
 export default function Login() {
   const router = useRouter();
@@ -10,6 +11,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(true);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Check if already logged in
   useEffect(() => {
@@ -78,7 +80,7 @@ export default function Login() {
       // fetch() itself threw — backend is unreachable
       console.error("Network error — backend not reachable:", networkErr);
       setError(
-        "Cannot reach the server. Make sure the backend is running on port 8000."
+        "Cannot connect to the server. Please ensure the backend is running on port 8000 and try again."
       );
       return;
     }
@@ -87,21 +89,48 @@ export default function Login() {
 
     // ── 2. Handle non-OK responses ────────────────────────────────
     if (!res.ok) {
-      // Try to parse an error message; fall back gracefully
-      let message = "Invalid credentials. Please try again.";
+      // Try to parse an error message with detailed explanations
+      let message = "Login failed. Please check your credentials and try again.";
       try {
         const data = await res.json();
         console.error("Login failed:", data);
-        if (data?.error) message = data.error;
-        else if (data?.detail) message = data.detail;
-        else if (data?.non_field_errors) message = data.non_field_errors[0];
-        else if (typeof data === "string") message = data;
+        
+        // Check for specific error types
+        if (data?.error) {
+          const errorMsg = data.error.toLowerCase();
+          if (errorMsg.includes('invalid credentials') || errorMsg.includes('invalid username') || errorMsg.includes('invalid password')) {
+            message = "Invalid username/email or password. Please check your credentials and try again.";
+          } else if (errorMsg.includes('account disabled') || errorMsg.includes('inactive')) {
+            message = "Your account has been disabled. Please contact support for assistance.";
+          } else if (errorMsg.includes('not found')) {
+            message = "No account found with these credentials. Please check your username/email or sign up.";
+          } else {
+            message = data.error;
+          }
+        } else if (data?.detail) {
+          const detailMsg = data.detail.toLowerCase();
+          if (detailMsg.includes('credentials') || detailMsg.includes('authentication')) {
+            message = "Invalid username/email or password. Please try again.";
+          } else {
+            message = data.detail;
+          }
+        } else if (data?.non_field_errors) {
+          message = Array.isArray(data.non_field_errors) 
+            ? data.non_field_errors[0] 
+            : data.non_field_errors;
+        } else if (typeof data === "string") {
+          message = data;
+        }
       } catch {
         // Body was empty or not JSON — use the status code for context
         if (res.status === 401 || res.status === 403) {
-          message = "Invalid username/email or password.";
+          message = "Invalid username/email or password. Please check your credentials.";
+        } else if (res.status === 429) {
+          message = "Too many login attempts. Please wait a few minutes and try again.";
         } else if (res.status >= 500) {
-          message = `Server error (${res.status}). Check that Django is running.`;
+          message = `Server error (${res.status}). The server is experiencing issues. Please try again later.`;
+        } else if (res.status === 400) {
+          message = "Invalid login request. Please ensure all fields are filled correctly.";
         }
       }
       setError(message);
@@ -117,20 +146,34 @@ export default function Login() {
     }
     console.log("Login successful:", data);
 
-    const role = data.user?.role;
-    if (role === "admin") {
-      router.push("/admin");
-    } else if (role === "coach" || role === "coach_pending") {
-      router.push("/dashboard/coach");
-    } else if (role === "athlete") {
-      router.push("/dashboard/player");
-    } else {
-      router.push("/auth/choose-role");
-    }
+    // Show success toast
+    setShowSuccessToast(true);
+
+    // Redirect after brief delay to show toast
+    setTimeout(() => {
+      const role = data.user?.role;
+      if (role === "admin") {
+        router.push("/admin");
+      } else if (role === "coach" || role === "coach_pending") {
+        router.push("/dashboard/coach");
+      } else if (role === "athlete") {
+        router.push("/dashboard/player");
+      } else {
+        router.push("/auth/choose-role");
+      }
+    }, 1500);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
+      {/* Success Toast */}
+      {showSuccessToast && (
+        <SuccessToast
+          message="Login successful! Redirecting to dashboard..."
+          onClose={() => setShowSuccessToast(false)}
+        />
+      )}
+      
       <div className="w-full max-w-md px-6">
         <h1 className="text-3xl md:text-4xl font-semibold text-center mb-8">
           Sign In to your account
