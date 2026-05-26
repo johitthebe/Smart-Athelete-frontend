@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Line, Bar, Radar } from "react-chartjs-2";
 import { API_BASE_URL } from "@/lib/config";
+import { useToast } from "@/app/component/ToastContainer";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -39,9 +40,10 @@ type PerformanceLog = {
   intensity: number;
 };
 
-type TimeRange = "week" | "month" | "year";
+type TimeRange = "week" | "month" | "3months" | "year";
 
 export default function PerformanceReportsPage() {
+  const toast = useToast();
   const [logs, setLogs] = useState<PerformanceLog[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -126,16 +128,16 @@ export default function PerformanceReportsPage() {
       });
 
       if (response.ok) {
-        alert("Report shared with coach successfully!");
+        toast.success("Report shared with coach successfully! 🎉");
         setShowShareModal(false);
         setShareForm({ coach: "", title: "", athlete_notes: "" });
       } else {
         const error = await response.json();
-        alert(`Failed to share report: ${error.error || JSON.stringify(error)}`);
+        toast.error(`Failed to share report: ${error.error || JSON.stringify(error)}`);
       }
     } catch (error) {
       console.error("Error sharing report:", error);
-      alert("Failed to share report");
+      toast.error("Failed to share report");
     }
   };
 
@@ -253,6 +255,7 @@ export default function PerformanceReportsPage() {
             >
               <option value="week">Last Week</option>
               <option value="month">Last Month</option>
+              <option value="3months">Last 3 Months</option>
               <option value="year">Last Year</option>
             </select>
           </div>
