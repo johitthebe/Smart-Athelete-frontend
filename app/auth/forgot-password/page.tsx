@@ -17,6 +17,9 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
+      console.log("Sending password reset request to:", `${API_BASE_URL}/api/auth/password-reset/request/`);
+      console.log("Email:", email);
+      
       const response = await fetch(`${API_BASE_URL}/api/auth/password-reset/request/`, {
         method: "POST",
         headers: {
@@ -25,7 +28,9 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       });
 
+      console.log("Password reset response status:", response.status);
       const data = await response.json();
+      console.log("Password reset response data:", data);
 
       if (response.ok) {
         setSuccess(true);
