@@ -93,11 +93,15 @@ export default function Signup() {
       });
 
       const text = await res.text();
+      console.log("Registration response status:", res.status);
+      console.log("Registration response text:", text);
+      
       let data: any = {};
       try {
         data = text ? JSON.parse(text) : {};
       } catch {
         // non‑JSON error (like HTML 403 page)
+        console.error("Failed to parse response as JSON");
       }
 
       if (res.ok) {
