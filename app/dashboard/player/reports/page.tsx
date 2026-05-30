@@ -534,7 +534,7 @@ export default function PerformanceReportsPage() {
                 </div>
 
                 <div className="space-y-3">
-                  {activityData.labels.map((label, i) => (
+                  {activityData.labels.map((label: string, i: number) => (
                     <div key={`activity-${i}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="font-medium text-gray-900">{label}</span>
                       <span className="text-sm font-semibold text-blue-600">
