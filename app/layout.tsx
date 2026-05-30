@@ -13,6 +13,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Smart Athlete — Performance Tracking Platform",
   description: "AI-powered athletic performance tracking, coaching, and analytics platform.",
+  icons: {
+    icon: "/weblogo.svg",
+    shortcut: "/weblogo.svg",
+    apple: "/weblogo.svg",
+  },
 };
 
 export default function RootLayout({
