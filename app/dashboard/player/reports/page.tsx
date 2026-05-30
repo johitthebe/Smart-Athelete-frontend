@@ -437,7 +437,7 @@ export default function PerformanceReportsPage() {
                         legend: { display: true, position: "top" },
                         tooltip: {
                           callbacks: {
-                            label: (context) => `${context.parsed.y.toFixed(2)} km/min`,
+                            label: (context) => `${context.parsed.y?.toFixed(2) ?? '0'} km/min`,
                           },
                         },
                       },
