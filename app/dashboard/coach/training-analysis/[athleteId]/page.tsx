@@ -249,7 +249,7 @@ export default function AthleteDetailedTESPage() {
                 <p className="text-sm font-medium text-gray-700 mb-1">Expected Outcome:</p>
                 <div className="text-sm text-gray-600">
                   {Object.entries(phase.expected_outcome).map(([key, value]) => (
-                    <p key={key}>• {key.replace(/_/g, ' ')}: {value}</p>
+                    <p key={key}>• {key.replace(/_/g, ' ')}: {String(value)}</p>
                   ))}
                 </div>
               </div>
