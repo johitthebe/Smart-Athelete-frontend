@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/lib/config";
 
 type Role = "coach" | "athlete";
 
@@ -14,10 +15,10 @@ export default function ChooseRole() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch current user from backend via proxy
+    // Fetch current user from backend
     const fetchUser = async () => {
       try {
-        const res = await fetch("/api/auth/me/", {
+        const res = await fetch(`${API_BASE_URL}/api/auth/me/`, {
           method: "GET",
           credentials: "include",
         });
@@ -74,16 +75,16 @@ export default function ChooseRole() {
         return null;
       };
 
-      // Fetch CSRF cookie first via proxy
-      await fetch("/api/csrf/", {
+      // Fetch CSRF cookie first
+      await fetch(`${API_BASE_URL}/api/csrf/`, {
         method: "GET",
         credentials: "include",
       });
 
       const csrfToken = getCookie("csrftoken");
 
-      // Call set-my-role endpoint via proxy
-      const res = await fetch("/api/auth/set-my-role/", {
+      // Call set-my-role endpoint
+      const res = await fetch(`${API_BASE_URL}/api/auth/set-my-role/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -99,7 +100,7 @@ export default function ChooseRole() {
         // Redirect based on role
         if (selectedRole === "athlete") {
           // Check onboarding status for athletes
-          const onboardingRes = await fetch("/api/auth/onboarding/status/", {
+          const onboardingRes = await fetch(`${API_BASE_URL}/api/auth/onboarding/status/`, {
             method: "GET",
             credentials: "include",
             headers: {

@@ -118,14 +118,14 @@ function VerifyEmailContent() {
     setError("");
 
     try {
-      await fetch("/api/csrf/", {
+      await fetch(`${API_BASE_URL}/api/csrf/`, {
         method: "GET",
         credentials: "include",
       });
 
       const csrfToken = getCookie("csrftoken");
 
-      const res = await fetch("/api/auth/verify-email/", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/verify-email/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -170,14 +170,14 @@ function VerifyEmailContent() {
     setSuccess("");
 
     try {
-      await fetch("/api/csrf/", {
+      await fetch(`${API_BASE_URL}/api/csrf/`, {
         method: "GET",
         credentials: "include",
       });
 
       const csrfToken = getCookie("csrftoken");
 
-      const res = await fetch("/api/auth/resend-otp/", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/resend-otp/`, {
         method: "POST",
         credentials: "include",
         headers: {

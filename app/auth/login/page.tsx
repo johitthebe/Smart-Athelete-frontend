@@ -68,7 +68,7 @@ export default function Login() {
     // ── 1. Fire the request ───────────────────────────────────────
     try {
       const csrfToken = getCookie("csrftoken");
-      res = await fetch("/api/auth/login/", {
+      res = await fetch(`${API_BASE_URL}/api/auth/login/`, {
         method: "POST",
         credentials: "include",
         headers: {
