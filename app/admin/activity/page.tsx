@@ -193,8 +193,7 @@ export default function ActivityTracking() {
                 <select
                   value={filter.action_type}
                   onChange={(e) => setFilter({ ...filter, action_type: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent text-sm"
-                  style={{ focusRing: "2px solid #173B80" }}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#173B80] focus:border-transparent text-sm"
                 >
                   <option value="">All Actions</option>
                   <option value="goal_created">Goal Created</option>
