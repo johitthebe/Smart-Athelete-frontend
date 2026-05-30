@@ -57,7 +57,7 @@ export default function LandingPage() {
               className="w-10 h-10 object-contain"
             />
             <span className="font-bold text-xl text-gray-900">
-              Smart<span className="text-blue-600">Athlete</span>
+              Smart<span className="text-[#173B80]">Athlete</span>
             </span>
           </div>
           
@@ -69,7 +69,7 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-3">
             <Link href="/auth/signup" className="text-sm text-gray-600 hover:text-gray-900">Sign Up</Link>
-            <Link href="/auth/login" className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+            <Link href="/auth/login" className="px-4 py-2 bg-[#173B80] text-white text-sm font-medium rounded-lg hover:bg-[#0f2a5a]">
               Login
             </Link>
           </div>
@@ -84,7 +84,7 @@ export default function LandingPage() {
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
               TRAIN<br />
               SMARTER,<br />
-              <span className="text-blue-600">ACHIEVE MORE</span>
+              <span className="text-[#173B80]">ACHIEVE MORE</span>
             </h1>
             <p className="text-lg text-gray-600 mb-8">
               Track your performance, get AI-powered insights, and connect with expert coaches to reach your goals faster.
@@ -93,12 +93,6 @@ export default function LandingPage() {
               <Link href="/auth/signup" className="px-6 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800">
                 GET STARTED TODAY
               </Link>
-              <button className="px-6 py-3 border border-gray-300 text-gray-900 font-medium rounded-lg hover:bg-gray-50 flex items-center gap-2">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
-                </svg>
-                PLAY VIDEO
-              </button>
             </div>
           </div>
           
@@ -113,7 +107,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Bar */}
-      <section className="bg-blue-600 py-12 px-6">
+      <section className="bg-[#173B80] py-12 px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white">
           <div>
             <p className="text-4xl font-bold mb-2">10K+</p>
@@ -155,35 +149,114 @@ export default function LandingPage() {
       </section>
 
       {/* Why Smart Athlete */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 text-center mb-4">WHY SMART ATHLETE?</h2>
-          <p className="text-center text-gray-600 mb-12">Everything you need to reach your athletic potential</p>
+      <section className="py-24 px-6 bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#173B80]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#173B80]/5 rounded-full blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#173B80]/10 rounded-full mb-6">
+              <div className="w-2 h-2 bg-[#173B80] rounded-full animate-pulse"></div>
+              <span className="text-sm font-semibold text-[#173B80] uppercase tracking-wider">Why Choose Us</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+              WHY SMART ATHLETE?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Everything you need to reach your athletic potential
+            </p>
+          </div>
           
+          {/* Feature Cards */}
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                icon: '📊',
+                icon: (
+                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                ),
                 title: 'AI-Powered Insights',
-                description: 'Get personalized recommendations based on your performance data and training history.'
+                description: 'Get personalized recommendations based on your performance data and training history.',
+                gradient: 'from-[#173B80] to-[#2E6BE6]',
+                bgPattern: 'bg-gradient-to-br from-[#173B80]/10 to-[#2E6BE6]/5'
               },
               {
-                icon: '🎯',
+                icon: (
+                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ),
                 title: 'Smart Goal Tracking',
-                description: 'Set ambitious goals and track your progress with intelligent analytics and benchmarks.'
+                description: 'Set ambitious goals and track your progress with intelligent analytics and benchmarks.',
+                gradient: 'from-[#173B80] to-[#00C2A8]',
+                bgPattern: 'bg-gradient-to-br from-[#173B80]/10 to-[#00C2A8]/5'
               },
               {
-                icon: '👨‍🏫',
+                icon: (
+                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                ),
                 title: 'Expert Coach Guidance',
-                description: 'Connect with certified coaches who provide feedback and help you improve faster.'
+                description: 'Connect with certified coaches who provide feedback and help you improve faster.',
+                gradient: 'from-[#173B80] to-[#F59E0B]',
+                bgPattern: 'bg-gradient-to-br from-[#173B80]/10 to-[#F59E0B]/5'
               }
             ].map((feature, i) => (
-              <div key={i} className="bg-gray-50 p-8 rounded-xl">
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+              <div 
+                key={i} 
+                className="group relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 overflow-hidden"
+              >
+                {/* Background gradient on hover */}
+                <div className={`absolute inset-0 ${feature.bgPattern} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+                
+                {/* Content */}
+                <div className="relative z-10">
+                  {/* Icon */}
+                  <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${feature.gradient} text-white mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    {feature.icon}
+                  </div>
+                  
+                  {/* Title */}
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#173B80] transition-colors">
+                    {feature.title}
+                  </h3>
+                  
+                  {/* Description */}
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
+                  
+                  {/* Decorative arrow */}
+                  <div className="mt-6 flex items-center text-[#173B80] font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span className="text-sm">Learn more</span>
+                    <svg className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </div>
+                </div>
+                
+                {/* Corner accent */}
+                <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${feature.gradient} opacity-5 rounded-bl-full`}></div>
               </div>
             ))}
+          </div>
+          
+          {/* Bottom CTA */}
+          <div className="mt-16 text-center">
+            <Link 
+              href="/auth/signup" 
+              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#173B80] to-[#2E6BE6] text-white font-semibold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
+            >
+              <span>Start Your Journey Today</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
+            <p className="mt-4 text-sm text-gray-500">No credit card required • Free 14-day trial</p>
           </div>
         </div>
       </section>
@@ -193,7 +266,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900">MEET YOUR COACHES</h2>
-            <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-medium">
+            <Link href="/auth/signup" className="text-[#173B80] hover:text-[#0f2a5a] font-medium">
               View All →
             </Link>
           </div>
@@ -285,7 +358,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-blue-50">
+      <section className="py-20 px-6 bg-gradient-to-br from-[#173B80]/5 via-blue-50/30 to-white">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
@@ -296,16 +369,15 @@ export default function LandingPage() {
             <p className="text-lg text-gray-600 mb-8">
               Join thousands of athletes who are already training smarter and achieving more with SmartAthlete.
             </p>
-            <form className="flex gap-3">
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              />
-              <button className="px-6 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800">
-                →
-              </button>
-            </form>
+            <Link 
+              href="/auth/signup"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-[#173B80] text-white font-semibold rounded-lg hover:bg-[#0f2a5a] transition-colors"
+            >
+              <span>Get Started Now</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
           </div>
           
           <div className="relative h-[500px] rounded-2xl overflow-hidden">
@@ -324,11 +396,11 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
+                <img 
+                  src="/logo.svg" 
+                  alt="Smart Athlete Logo" 
+                  className="w-8 h-8 object-contain"
+                />
                 <span className="font-bold text-xl">SmartAthlete</span>
               </div>
               <p className="text-gray-400 text-sm">Train smarter, achieve more.</p>
