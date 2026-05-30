@@ -421,7 +421,7 @@ export default function ActivityAnalysisPage() {
                     label: (context) => {
                       let label = context.dataset.label || "";
                       if (label) label += ": ";
-                      label += context.parsed.y.toFixed(2);
+                      label += context.parsed.y?.toFixed(2) ?? '0';
                       return label;
                     },
                   },
