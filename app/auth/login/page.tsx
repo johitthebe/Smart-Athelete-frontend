@@ -12,6 +12,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(true);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
 
   // Check if already logged in
   useEffect(() => {
@@ -74,7 +75,7 @@ export default function Login() {
           "Content-Type": "application/json",
           ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
         },
-        body: JSON.stringify({ identifier, password }),
+        body: JSON.stringify({ username: identifier, password }),
       });
     } catch (networkErr) {
       // fetch() itself threw — backend is unreachable
@@ -95,10 +96,20 @@ export default function Login() {
         const data = await res.json();
         console.error("Login failed:", data);
         
+        // Check if email verification is required
+        if (data?.requires_verification && data?.email) {
+          setVerificationEmail(data.email);
+          setError("Your email is not verified. Please verify your email to login.");
+          return;
+        }
+        
         // Check for specific error types
         if (data?.error) {
           const errorMsg = data.error.toLowerCase();
-          if (errorMsg.includes('invalid credentials') || errorMsg.includes('invalid username') || errorMsg.includes('invalid password')) {
+          if (errorMsg.includes('email not verified')) {
+            setVerificationEmail(data.email || identifier);
+            message = "Your email is not verified. Please verify your email to login.";
+          } else if (errorMsg.includes('invalid credentials') || errorMsg.includes('invalid username') || errorMsg.includes('invalid password')) {
             message = "Invalid username/email or password. Please check your credentials and try again.";
           } else if (errorMsg.includes('account disabled') || errorMsg.includes('inactive')) {
             message = "Your account has been disabled. Please contact support for assistance.";
@@ -180,7 +191,20 @@ export default function Login() {
         </h1>
 
         {error && (
-          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+          <div className="mb-4">
+            <p className="text-red-500 text-sm text-center mb-2">{error}</p>
+            {verificationEmail && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => router.push(`/auth/verify-email?email=${encodeURIComponent(verificationEmail)}`)}
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
+                >
+                  Go to email verification
+                </button>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Login form */}

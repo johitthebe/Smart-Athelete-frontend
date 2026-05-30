@@ -101,13 +101,12 @@ export default function Signup() {
       }
 
       if (res.ok) {
-        // User is now logged in automatically
-        // Show success toast
+        // Registration successful - redirect to email verification
         setShowSuccessToast(true);
         
-        // Redirect to choose role page after a brief delay
+        // Redirect to email verification page after a brief delay
         setTimeout(() => {
-          router.push("/auth/choose-role");
+          router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
         }, 1500);
       } else {
         console.log("REGISTER ERROR:", data);
@@ -183,6 +182,10 @@ export default function Signup() {
         <h1 className="text-3xl md:text-4xl font-semibold text-center text-blue-600 mb-10">
           Create your free account
         </h1>
+        
+        <p className="text-center text-gray-600 mb-6">
+          You'll receive a verification code via email after registration
+        </p>
 
         {error && (
           <p className="text-red-500 text-sm text-center mb-4">{error}</p>

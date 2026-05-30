@@ -24,20 +24,20 @@ const Header: React.FC = () => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200'
-          : 'bg-white/90 backdrop-blur-sm'
+          ? 'bg-slate-950/95 backdrop-blur-xl shadow-sm border-b border-white/10'
+          : 'bg-slate-950/80 backdrop-blur-sm'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+        <div className="flex h-16 sm:h-20 items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#2E6BE6] to-[#00C2A8] flex items-center justify-center shadow-lg shadow-[#2E6BE6]/20">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <span className="font-bold text-xl text-gray-900 hidden sm:block">
-              Smart<span className="text-blue-600">Athlete</span>
+            <span className="font-semibold text-base text-white tracking-tight">
+              Smart<span className="text-[#00C2A8]">Athlete</span>
             </span>
           </Link>
 
@@ -46,7 +46,7 @@ const Header: React.FC = () => {
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+                className="text-sm font-medium text-slate-200 hover:text-white transition-colors"
               >
                 {link.label}
               </Link>
@@ -56,14 +56,14 @@ const Header: React.FC = () => {
           <div className="flex items-center gap-3">
             <Link
               href="/auth/login"
-              className="px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+              className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/10 transition-colors"
             >
               Login
             </Link>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100"
+              className="md:hidden p-2 rounded-md text-slate-200 hover:bg-white/10"
             >
               {mobileMenuOpen ? (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,14 +80,14 @@ const Header: React.FC = () => {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200">
+        <div className="md:hidden bg-slate-950 border-t border-white/10">
           <div className="px-4 py-4 space-y-2">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-3 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
+                className="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-200 hover:bg-white/5"
               >
                 {link.label}
               </Link>
